@@ -186,7 +186,7 @@ body {
 }
 
 .search-action-btn {
-  background-color: var(--c-mid-green);
+  background-color: var(--c-dark-green);
   color: var(--c-white);
   border: none;
   padding: 0 26px;
