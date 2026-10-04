@@ -48,6 +48,17 @@ body {
   align-items: center;
 }
 
+.nav-sahod-tag {
+  font-family: var(--font-num);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--c-dark-green);
+  background-color: var(--c-white);
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
 .brand {
   display: flex;
   align-items: center;
