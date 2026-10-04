@@ -7,54 +7,60 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Top Simple Nav -->
-  <header class="navbar">
-    <div class="brand">
-      <span class="brand-dot"></span>
-      <span class="brand-name">Broke O'Clock</span>
-    </div>
-    <span class="nav-tag">Horology Reality Check</span>
-  </header>
+  <!-- Fullscreen 100vh Hero Page -->
+  <section class="hero-screen">
+    <nav class="hero-nav">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Broke O'Clock</span>
+      </div>
+      <span class="nav-tag">Salary Reality Check</span>
+    </nav>
 
-  <!-- Wise-Style Bold Hero Section -->
-  <section class="hero-section">
-    <div class="hero-pill">15/30 SAHOD CHECK</div>
-    <h1 class="hero-headline">
-      BUY YOUR DREAM WATCH.<br>
-      JUST WORK 40 MORE YEARS.
-    </h1>
-    <p class="hero-quote">
-      "Time is free, but a Rolex costs 3,000 overtime hours."
-    </p>
-    <a href="#calculator" class="hero-cta">Calculate Your Reality ↓</a>
+    <div class="hero-content">
+      <span class="hero-pill">15/30 SAHOD CHECK</span>
+      <h1 class="hero-headline">
+        BUY YOUR DREAM WATCH.<br>
+        JUST WORK 40 MORE YEARS.
+      </h1>
+      <p class="hero-quote">
+        "Time is free, but a Rolex costs 3,000 overtime hours."
+      </p>
+      <a href="#dashboard" class="hero-cta">Calculate Your Reality ↓</a>
+    </div>
+
+    <div class="scroll-indicator">
+      <span>Scroll down to compare</span>
+    </div>
   </section>
 
-  <!-- Dashboard Workspace (Donezo Inspired) -->
-  <section id="calculator" class="dashboard-section">
+  <!-- Below-The-Fold Main Dashboard -->
+  <section id="dashboard" class="dashboard-section">
     <div class="dashboard-shell">
       
-      <!-- Search & Controls Bar -->
-      <div class="dashboard-topbar">
-        <div class="search-field">
+      <!-- Search Bar -->
+      <div class="search-row">
+        <div class="search-wrap">
           <input 
             type="text" 
             id="watch-search" 
             placeholder="Search watch by brand, model, or nickname..." 
             autocomplete="off"
           />
+          <button id="search-btn" class="search-action-btn">Search</button>
           <div id="search-dropdown" class="search-dropdown hidden"></div>
         </div>
       </div>
 
-      <!-- Main Compare Cards Grid -->
+      <!-- Main Comparison Grid -->
       <div class="dashboard-grid">
         
-        <!-- Left: Watch Card -->
-        <div class="dash-card watch-card">
+        <!-- Left: Watch Info Card -->
+        <div class="card watch-card">
           <div class="card-tag-row">
             <span id="watch-brand" class="tag-brand">WATCH BRAND</span>
             <span id="spec-year" class="tag-year">YEAR</span>
@@ -62,7 +68,7 @@
 
           <div class="watch-body">
             <div class="image-frame">
-              <img id="watch-img" src="" alt="Watch" class="hidden" />
+              <img id="watch-img" src="" alt="Selected Watch" class="hidden" />
               <div id="image-placeholder" class="img-empty">
                 <span>Select a watch from search</span>
               </div>
@@ -101,7 +107,7 @@
         </div>
 
         <!-- Right: Salary & Result Card -->
-        <div class="dash-card calc-card">
+        <div class="card calc-card">
           <div class="card-tag-row">
             <span class="tag-brand">SALARY CALCULATOR</span>
             <span id="verdict-badge" class="tag-status">Awaiting Input</span>
@@ -132,7 +138,7 @@
             </div>
           </div>
 
-          <!-- Stat Counters -->
+          <!-- Stats Counters -->
           <div class="stats-banner">
             <div class="stat-unit">
               <span id="out-years" class="stat-val">--</span>
