@@ -67,15 +67,6 @@ body {
   letter-spacing: -0.5px;
 }
 
-.nav-tag {
-  font-size: 12px;
-  font-weight: 700;
-  background-color: var(--c-mid-green);
-  color: var(--c-white);
-  padding: 6px 14px;
-  border-radius: 20px;
-}
-
 .hero-content {
   max-width: 900px;
   width: 100%;
@@ -84,17 +75,6 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.hero-pill {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--c-white);
-  background-color: var(--c-mid-green);
-  padding: 6px 14px;
-  border-radius: 20px;
-  margin-bottom: 20px;
 }
 
 .hero-headline {
@@ -132,12 +112,8 @@ body {
   transform: translateY(-2px);
 }
 
-.scroll-indicator {
-  text-align: center;
-  font-size: 12px;
-  color: var(--c-white);
-  opacity: 0.7;
-  letter-spacing: 0.5px;
+.hero-spacer {
+  height: 24px;
 }
 
 /* 2. Below-the-fold Dashboard Section */
