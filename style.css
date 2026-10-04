@@ -1,4 +1,4 @@
-/* Color Palette Archetype */
+/* Color variables */
 :root {
   --c-dark-green: #546B41;
   --c-mid-green: #99AD7A;
@@ -11,6 +11,7 @@
   --font-num: 'Space Mono', monospace;
 }
 
+/* Reset */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -28,35 +29,24 @@ body {
   min-height: 100vh;
 }
 
-/* 1. Fullscreen Hero Section (100vh) */
-.hero-screen {
-  min-height: 100vh;
+/* Top bar */
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   background-color: var(--c-dark-green);
-  color: var(--c-white);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 32px 24px;
+  border-bottom: 1px solid rgba(255, 248, 236, 0.15);
+  padding: 14px 28px;
 }
 
-.hero-nav {
-  max-width: 1120px;
-  width: 100%;
+.nav-inner {
+  max-width: 1160px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.nav-sahod-tag {
-  font-family: var(--font-num);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--c-dark-green);
-  background-color: var(--c-white);
-  padding: 6px 14px;
-  border-radius: 20px;
 }
 
 .brand {
@@ -66,22 +56,44 @@ body {
 }
 
 .brand-dot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   background-color: var(--c-white);
   border-radius: 50%;
 }
 
 .brand-name {
   font-weight: 800;
-  font-size: 18px;
+  font-size: 17px;
   letter-spacing: -0.5px;
+  color: var(--c-white);
+}
+
+.nav-sahod-tag {
+  font-family: var(--font-num);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--c-dark-green);
+  background-color: var(--c-white);
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+/* Hero section */
+.hero-screen {
+  min-height: 100vh;
+  background-color: var(--c-dark-green);
+  color: var(--c-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 24px 40px 24px;
 }
 
 .hero-content {
   max-width: 900px;
-  width: 100%;
-  margin: 0 auto;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -89,11 +101,11 @@ body {
 }
 
 .hero-headline {
-  font-size: 54px;
+  font-size: 52px;
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -1.5px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   color: var(--c-white);
 }
 
@@ -103,7 +115,7 @@ body {
   opacity: 0.85;
   font-style: italic;
   max-width: 600px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .hero-cta {
@@ -112,7 +124,7 @@ body {
   color: var(--c-dark-green);
   font-weight: 700;
   font-size: 15px;
-  padding: 16px 36px;
+  padding: 15px 34px;
   border-radius: 30px;
   text-decoration: none;
   transition: transform 0.15s, background-color 0.15s;
@@ -124,26 +136,29 @@ body {
 }
 
 .hero-spacer {
-  height: 24px;
+  height: 20px;
 }
 
-/* 2. Below-the-fold Dashboard Section */
+/* Dashboard area */
 .dashboard-section {
   min-height: 100vh;
-  padding: 60px 20px 80px 20px;
+  padding: 68px 20px 20px 20px;
+  scroll-margin-top: 0;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .dashboard-shell {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1140px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 12px;
 }
 
-/* Search Bar */
+/* Search bar */
 .search-row {
   width: 100%;
 }
@@ -153,16 +168,16 @@ body {
   position: relative;
   background-color: var(--c-white);
   border: 1px solid var(--c-border);
-  border-radius: 16px;
+  border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
 #watch-search {
   flex: 1;
-  padding: 16px 20px;
+  padding: 12px 18px;
   font-family: var(--font-main);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   border: none;
   background: transparent;
@@ -174,7 +189,7 @@ body {
   background-color: var(--c-mid-green);
   color: var(--c-white);
   border: none;
-  padding: 0 28px;
+  padding: 0 26px;
   font-family: var(--font-main);
   font-size: 13px;
   font-weight: 700;
@@ -184,13 +199,13 @@ body {
 
 .search-dropdown {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 4px);
   left: 0;
   right: 0;
   background-color: var(--c-white);
   border: 1px solid var(--c-border);
-  border-radius: 16px;
-  max-height: 280px;
+  border-radius: 14px;
+  max-height: 220px;
   overflow-y: auto;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   z-index: 100;
@@ -201,13 +216,13 @@ body {
 }
 
 .search-item {
-  padding: 12px 18px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--c-bg-subtle);
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -220,25 +235,27 @@ body {
   color: var(--c-dark-green);
 }
 
-/* 3. Dashboard Cards Grid */
+/* Dashboard grid */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 16px;
+  align-items: stretch;
 }
 
 .card {
   background-color: var(--c-white);
-  border-radius: 20px;
-  padding: 24px;
+  border-radius: 18px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  justify-content: space-between;
+  gap: 12px;
   border: 1px solid var(--c-border);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.02);
 }
 
-/* Card Header */
+/* Card top */
 .card-tag-row {
   display: flex;
   justify-content: space-between;
@@ -264,22 +281,22 @@ body {
   font-weight: 700;
   background-color: var(--c-bg-subtle);
   color: var(--c-dark-green);
-  padding: 4px 10px;
-  border-radius: 12px;
+  padding: 3px 9px;
+  border-radius: 10px;
 }
 
-/* Watch Body */
+/* Watch display */
 .watch-body {
   display: flex;
-  gap: 18px;
+  gap: 16px;
   align-items: center;
 }
 
 .image-frame {
-  width: 130px;
-  height: 130px;
+  width: 120px;
+  height: 120px;
   background-color: var(--c-dark-green);
-  border-radius: 16px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -301,7 +318,7 @@ body {
   color: var(--c-white);
   opacity: 0.75;
   text-align: center;
-  padding: 10px;
+  padding: 8px;
 }
 
 .watch-details {
@@ -319,11 +336,11 @@ body {
   color: var(--c-dark-green);
   font-weight: 700;
   margin-top: 2px;
-  min-height: 18px;
+  min-height: 16px;
 }
 
 .price-container {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .price-label {
@@ -335,22 +352,22 @@ body {
 
 .price-number {
   font-family: var(--font-num);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--c-dark-green);
 }
 
-/* Specs Tiles */
+/* Specs list */
 .specs-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .spec-tile {
   background-color: var(--c-bg-subtle);
-  padding: 10px 8px;
-  border-radius: 12px;
+  padding: 10px 6px;
+  border-radius: 10px;
   text-align: center;
 }
 
@@ -371,40 +388,40 @@ body {
 .inputs-stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .input-item label {
   display: block;
   font-size: 12px;
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .input-box {
   display: flex;
   align-items: center;
   border: 1px solid var(--c-border);
-  border-radius: 12px;
-  padding: 0 14px;
+  border-radius: 10px;
+  padding: 0 12px;
   background-color: var(--c-bg-subtle);
 }
 
 .currency-sym {
   font-family: var(--font-num);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--c-dark-green);
-  margin-right: 8px;
+  margin-right: 6px;
 }
 
 .input-box input {
   width: 100%;
-  padding: 12px 0;
+  padding: 8px 0;
   border: none;
   background: transparent;
   font-family: var(--font-num);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--c-charcoal);
   outline: none;
@@ -418,7 +435,7 @@ body {
 
 .slider-pct {
   font-family: var(--font-num);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--c-dark-green);
 }
@@ -426,7 +443,7 @@ body {
 input[type="range"] {
   width: 100%;
   accent-color: var(--c-dark-green);
-  margin: 8px 0;
+  margin: 6px 0;
   cursor: pointer;
 }
 
@@ -438,27 +455,27 @@ input[type="range"] {
   opacity: 0.7;
 }
 
-/* Stat Blocks */
+/* Number counters */
 .stats-banner {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 8px;
   background-color: var(--c-dark-green);
   color: var(--c-white);
-  border-radius: 14px;
-  padding: 14px 10px;
+  border-radius: 10px;
+  padding: 10px 8px;
   text-align: center;
 }
 
 .stat-val {
   display: block;
   font-family: var(--font-num);
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
 }
 
 .stat-lbl {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--c-white);
   opacity: 0.7;
   text-transform: uppercase;
@@ -467,7 +484,7 @@ input[type="range"] {
 
 /* Tradeoffs */
 .tradeoffs-box {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .tradeoffs-head {
@@ -476,20 +493,20 @@ input[type="range"] {
   font-weight: 700;
   color: var(--c-charcoal);
   opacity: 0.7;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .tradeoffs-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .tradeoffs-list li {
   font-size: 12px;
   font-weight: 500;
-  padding-left: 14px;
+  padding-left: 12px;
   position: relative;
 }
 
@@ -500,17 +517,17 @@ input[type="range"] {
   color: var(--c-dark-green);
 }
 
-/* Card Foot */
+/* Bottom area */
 .card-foot {
   border-top: 1px solid var(--c-bg-subtle);
-  padding-top: 12px;
+  padding-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .foot-quote {
-  font-size: 12px;
+  font-size: 11px;
   font-style: italic;
   color: var(--c-charcoal);
   opacity: 0.7;
@@ -518,10 +535,10 @@ input[type="range"] {
 
 .action-btn {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   background-color: var(--c-dark-green);
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   color: var(--c-white);
   font-family: var(--font-main);
   font-size: 13px;
@@ -534,7 +551,7 @@ input[type="range"] {
   opacity: 0.9;
 }
 
-/* Responsive */
+/* Mobile */
 @media (max-width: 860px) {
   .hero-headline {
     font-size: 38px;
