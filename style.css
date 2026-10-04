@@ -169,7 +169,7 @@ body {
   background-color: var(--c-white);
   border: 1px solid var(--c-border);
   border-radius: 14px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
@@ -189,6 +189,8 @@ body {
   background-color: var(--c-dark-green);
   color: var(--c-white);
   border: none;
+  border-top-right-radius: 13px;
+  border-bottom-right-radius: 13px;
   padding: 0 26px;
   font-family: var(--font-main);
   font-size: 13px;

@@ -86,7 +86,7 @@ function displayWatch(watch) {
   watchPrice.textContent = formatCurrency(priceVal);
 
   specCase.textContent = watch.case_diameter ? `${watch.case_diameter} mm` : '-- mm';
-  specMovement.textContent = watch.movement || '--';
+  specMovement.textContent = watch.movement || watch.engine || '--';
   specCategory.textContent = watch.category || '--';
   specOrigin.textContent = watch.origin || '--';
 
@@ -134,6 +134,16 @@ function showDropdown(items) {
 }
 
 /* Event listeners */
+searchInput.addEventListener('input', async (e) => {
+  const query = e.target.value.trim();
+  if (query.length < 2) {
+    searchDropdown.classList.add('hidden');
+    return;
+  }
+  const results = await searchWatches(query);
+  showDropdown(results);
+});
+
 searchBtn.addEventListener('click', async () => {
   const query = searchInput.value.trim();
   if (!query) return;

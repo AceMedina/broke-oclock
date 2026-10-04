@@ -11,7 +11,7 @@
 </head>
 <body>
 
-  <!-- Persistent Locked Top Bar -->
+  <!-- Top bar -->
   <nav class="site-nav">
     <div class="nav-inner">
       <div class="brand">
@@ -22,7 +22,7 @@
     </div>
   </nav>
 
-  <!-- Fullscreen 100vh Hero Page -->
+  <!-- Hero section -->
   <section class="hero-screen">
     <div class="hero-content">
       <h1 class="hero-headline">
@@ -38,11 +38,11 @@
     <div class="hero-spacer"></div>
   </section>
 
-  <!-- Below-The-Fold Main Dashboard -->
+  <!-- Dashboard area -->
   <section id="dashboard" class="dashboard-section">
     <div class="dashboard-shell">
       
-      <!-- Search Bar -->
+      <!-- Search bar -->
       <div class="search-row">
         <div class="search-wrap">
           <input 
@@ -56,10 +56,10 @@
         </div>
       </div>
 
-      <!-- Main Comparison Grid -->
+      <!-- Dashboard grid -->
       <div class="dashboard-grid">
         
-        <!-- Left: Watch Info Card -->
+        <!-- Watch card -->
         <div class="card watch-card">
           <div class="card-tag-row">
             <span id="watch-brand" class="tag-brand">WATCH BRAND</span>
@@ -85,35 +85,34 @@
             </div>
           </div>
 
-          <!-- Specs Tiles -->
+          <!-- Specs list -->
           <div class="specs-row">
             <div class="spec-tile">
-              <span class="spec-label">Case Size</span>
-              <span id="spec-case" class="spec-data">-- mm</span>
+              <span class="tile-label">Case Size</span>
+              <span id="spec-case" class="tile-val">-- mm</span>
             </div>
             <div class="spec-tile">
-              <span class="spec-label">Engine</span>
-              <span id="spec-movement" class="spec-data">--</span>
+              <span class="tile-label">Engine</span>
+              <span id="spec-movement" class="tile-val">--</span>
             </div>
             <div class="spec-tile">
-              <span class="spec-label">Type</span>
-              <span id="spec-category" class="spec-data">--</span>
+              <span class="tile-label">Type</span>
+              <span id="spec-category" class="tile-val">--</span>
             </div>
             <div class="spec-tile">
-              <span class="spec-label">Made In</span>
-              <span id="spec-origin" class="spec-data">--</span>
+              <span class="tile-label">Made In</span>
+              <span id="spec-origin" class="tile-val">--</span>
             </div>
           </div>
         </div>
 
-        <!-- Right: Salary & Result Card -->
+        <!-- Calculator card -->
         <div class="card calc-card">
           <div class="card-tag-row">
             <span class="tag-brand">SALARY CALCULATOR</span>
             <span id="verdict-badge" class="tag-status">Awaiting Input</span>
           </div>
 
-          <!-- Inputs -->
           <div class="inputs-stack">
             <div class="input-item">
               <label for="monthly-salary">Your Monthly Salary (PHP)</label>
@@ -138,7 +137,6 @@
             </div>
           </div>
 
-          <!-- Stats Counters -->
           <div class="stats-banner">
             <div class="stat-unit">
               <span id="out-years" class="stat-val">--</span>
@@ -154,7 +152,6 @@
             </div>
           </div>
 
-          <!-- Real World Equivalents -->
           <div class="tradeoffs-box">
             <span class="tradeoffs-head">Or you could buy instead:</span>
             <ul id="equivalents-items" class="tradeoffs-list">
