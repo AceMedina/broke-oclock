@@ -20,6 +20,18 @@ const specMovement = document.getElementById('spec-movement');
 const specCategory = document.getElementById('spec-category');
 const specOrigin = document.getElementById('spec-origin');
 
+/* DOM Elements - Calculator */
+const salaryInput = document.getElementById('monthly-salary');
+const savingsSlider = document.getElementById('savings-rate');
+const savingsDisplay = document.getElementById('savings-display');
+const verdictBadge = document.getElementById('verdict-badge');
+const outYears = document.getElementById('out-years');
+const outCutoffs = document.getElementById('out-cutoffs');
+const outHours = document.getElementById('out-hours');
+const equivalentsList = document.getElementById('equivalents-items');
+const humorQuote = document.getElementById('humor-quote');
+const copyBtn = document.getElementById('copy-slip-btn');
+
 /* State */
 let selectedWatch = null;
 
@@ -85,19 +97,109 @@ function displayWatch(watch) {
   const priceVal = watch.price_php || watch.price || 0;
   watchPrice.textContent = formatCurrency(priceVal);
 
-  specCase.textContent = watch.case_diameter ? `${watch.case_diameter} mm` : '-- mm';
-  specMovement.textContent = watch.movement || watch.engine || '--';
+  const caseDiameter = watch.case_size_mm || watch.case_diameter_mm || watch.case_diameter || watch.case_size;
+  specCase.textContent = caseDiameter ? `${caseDiameter} mm` : '-- mm';
+
+  specMovement.textContent = watch.movement || watch.calibre || watch.caliber || '--';
   specCategory.textContent = watch.category || '--';
   specOrigin.textContent = watch.origin || '--';
 
-  if (watch.image_url) {
-    watchImg.src = watch.image_url;
+  const imageUrl = watch.image_url || watch.image;
+  if (imageUrl) {
+    watchImg.src = imageUrl;
     watchImg.classList.remove('hidden');
     imagePlaceholder.classList.add('hidden');
   } else {
     watchImg.classList.add('hidden');
     imagePlaceholder.classList.remove('hidden');
   }
+
+  calculateReality();
+}
+
+/* Calculation engine */
+function calculateReality() {
+  const salary = parseFloat(salaryInput.value);
+  const savingsPct = parseInt(savingsSlider.value, 10);
+  savingsDisplay.textContent = `${savingsPct}%`;
+
+  if (!selectedWatch || !salary || salary <= 0) {
+    outYears.textContent = '--';
+    outCutoffs.textContent = '--';
+    outHours.textContent = '--';
+    verdictBadge.textContent = 'Awaiting Input';
+    equivalentsList.innerHTML = '<li>Enter your salary above to view trade-offs.</li>';
+    return;
+  }
+
+  const price = parseFloat(selectedWatch.price_php || selectedWatch.price || 0);
+  const monthlyAllocation = salary * (savingsPct / 100);
+
+  const monthsNeeded = price / monthlyAllocation;
+  const yearsNeeded = (monthsNeeded / 12).toFixed(1);
+  const cutoffsNeeded = Math.ceil(monthsNeeded * 2);
+  const hourlyRate = salary / 176;
+  const hoursNeeded = Math.ceil(price / hourlyRate);
+
+  outYears.textContent = yearsNeeded;
+  outCutoffs.textContent = cutoffsNeeded.toLocaleString();
+  outHours.textContent = hoursNeeded.toLocaleString();
+
+  if (monthsNeeded <= 6) {
+    verdictBadge.textContent = 'Financially Sane';
+  } else if (monthsNeeded <= 24) {
+    verdictBadge.textContent = 'Major Commitment';
+  } else if (monthsNeeded <= 60) {
+    verdictBadge.textContent = 'Midlife Crisis Level';
+  } else {
+    verdictBadge.textContent = 'Generational Debt';
+  }
+
+  const jollibeeMeals = Math.floor(price / 180);
+  const icedCoffees = Math.floor(price / 190);
+  const iPhones = (price / 85000).toFixed(1);
+  const studioRents = Math.floor(price / 15000);
+
+  equivalentsList.innerHTML = `
+    <li><strong>${jollibeeMeals.toLocaleString()}</strong> 2-pc Chickenjoy with rice meals</li>
+    <li><strong>${icedCoffees.toLocaleString()}</strong> Spanish Lattes from local cafés</li>
+    <li><strong>${iPhones}</strong> flagship iPhones at retail price</li>
+    <li><strong>${studioRents}</strong> months of Metro studio rent</li>
+  `;
+
+  if (monthsNeeded <= 12) {
+    humorQuote.textContent = '"A year of discipline. Entirely doable if you cut unli-samgyup."';
+  } else if (monthsNeeded <= 60) {
+    humorQuote.textContent = '"Your wrist will look brilliant while your savings account weeps softly."';
+  } else if (monthsNeeded <= 120) {
+    humorQuote.textContent = '"A decade of labor. By then, the service cost alone will need a loan."';
+  } else {
+    humorQuote.textContent = '"Leave this page open as your desktop wallpaper for character development."';
+  }
+}
+
+/* Copy summary */
+function copyRealitySummary() {
+  if (!selectedWatch || !salaryInput.value) {
+    alert('Please enter your salary first.');
+    return;
+  }
+
+  const brand = selectedWatch.brand || '';
+  const model = selectedWatch.model || '';
+  const price = watchPrice.textContent;
+  const years = outYears.textContent;
+  const cutoffs = outCutoffs.textContent;
+
+  const text = `Broke O'Clock Reality Check:\nTo buy a ${brand} ${model} (${price}) saving ${savingsSlider.value}% of my salary, I need to work for ${years} years (${cutoffs} paydays).\n\nCheck your delusion: ${window.location.href}`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = 'Copied to Clipboard!';
+    setTimeout(() => {
+      copyBtn.textContent = originalText;
+    }, 2000);
+  });
 }
 
 /* Render search dropdown items */
@@ -159,6 +261,10 @@ searchInput.addEventListener('keydown', async (e) => {
     showDropdown(results);
   }
 });
+
+salaryInput.addEventListener('input', calculateReality);
+savingsSlider.addEventListener('input', calculateReality);
+copyBtn.addEventListener('click', copyRealitySummary);
 
 /* Close dropdown on outside click */
 document.addEventListener('click', (e) => {
