@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Broke O'Clock — Salary to Watch Reality Check</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Simple Nav -->
+  <header class="navbar">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span class="brand-name">Broke O'Clock</span>
+    </div>
+    <span class="nav-tag">Horology Reality Check</span>
+  </header>
+
+  <!-- Wise-Style Bold Hero Section -->
+  <section class="hero-section">
+    <div class="hero-pill">15/30 SAHOD CHECK</div>
+    <h1 class="hero-headline">
+      BUY YOUR DREAM WATCH.<br>
+      JUST WORK 40 MORE YEARS.
+    </h1>
+    <p class="hero-quote">
+      "Time is free, but a Rolex costs 3,000 overtime hours."
+    </p>
+    <a href="#calculator" class="hero-cta">Calculate Your Reality ↓</a>
+  </section>
+
+  <!-- Dashboard Workspace (Donezo Inspired) -->
+  <section id="calculator" class="dashboard-section">
+    <div class="dashboard-shell">
+      
+      <!-- Search & Controls Bar -->
+      <div class="dashboard-topbar">
+        <div class="search-field">
+          <input 
+            type="text" 
+            id="watch-search" 
+            placeholder="Search watch by brand, model, or nickname..." 
+            autocomplete="off"
+          />
+          <div id="search-dropdown" class="search-dropdown hidden"></div>
+        </div>
+      </div>
+
+      <!-- Main Compare Cards Grid -->
+      <div class="dashboard-grid">
+        
+        <!-- Left: Watch Card -->
+        <div class="dash-card watch-card">
+          <div class="card-tag-row">
+            <span id="watch-brand" class="tag-brand">WATCH BRAND</span>
+            <span id="spec-year" class="tag-year">YEAR</span>
+          </div>
+
+          <div class="watch-body">
+            <div class="image-frame">
+              <img id="watch-img" src="" alt="Watch" class="hidden" />
+              <div id="image-placeholder" class="img-empty">
+                <span>Select a watch from search</span>
+              </div>
+            </div>
+
+            <div class="watch-details">
+              <h2 id="watch-model" class="watch-title">Select a watch</h2>
+              <p id="watch-nickname" class="watch-nick"></p>
+              
+              <div class="price-container">
+                <span class="price-label">Market Value</span>
+                <span id="watch-price" class="price-number">₱0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Specs Tiles -->
+          <div class="specs-row">
+            <div class="spec-tile">
+              <span class="tile-label">Case Size</span>
+              <span id="spec-case" class="tile-val">-- mm</span>
+            </div>
+            <div class="spec-tile">
+              <span class="tile-label">Engine</span>
+              <span id="spec-movement" class="tile-val">--</span>
+            </div>
+            <div class="spec-tile">
+              <span class="tile-label">Type</span>
+              <span id="spec-category" class="tile-val">--</span>
+            </div>
+            <div class="spec-tile">
+              <span class="tile-label">Made In</span>
+              <span id="spec-origin" class="tile-val">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Salary & Result Card -->
+        <div class="dash-card calc-card">
+          <div class="card-tag-row">
+            <span class="tag-brand">SALARY CALCULATOR</span>
+            <span id="verdict-badge" class="tag-status">Awaiting Input</span>
+          </div>
+
+          <!-- Inputs -->
+          <div class="inputs-stack">
+            <div class="input-item">
+              <label for="monthly-salary">Your Monthly Salary (PHP)</label>
+              <div class="input-box">
+                <span class="currency-sym">₱</span>
+                <input type="number" id="monthly-salary" placeholder="30,000" min="1" />
+              </div>
+            </div>
+
+            <div class="input-item">
+              <div class="slider-info">
+                <label for="savings-rate">Watch Savings Cut</label>
+                <span id="savings-display" class="slider-pct">20%</span>
+              </div>
+              <input type="range" id="savings-rate" min="5" max="100" value="20" step="5" />
+              <div class="slider-steps">
+                <span>5% (Easy)</span>
+                <span>20% (Normal)</span>
+                <span>50% (Hard)</span>
+                <span>100% (No Food)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stat Counters -->
+          <div class="stats-banner">
+            <div class="stat-unit">
+              <span id="out-years" class="stat-val">--</span>
+              <span class="stat-lbl">Years</span>
+            </div>
+            <div class="stat-unit">
+              <span id="out-cutoffs" class="stat-val">--</span>
+              <span class="stat-lbl">Paydays</span>
+            </div>
+            <div class="stat-unit">
+              <span id="out-hours" class="stat-val">--</span>
+              <span class="stat-lbl">Work Hours</span>
+            </div>
+          </div>
+
+          <!-- Real World Equivalents -->
+          <div class="tradeoffs-box">
+            <span class="tradeoffs-head">Or you could buy instead:</span>
+            <ul id="equivalents-items" class="tradeoffs-list">
+              <li>Enter your salary above to view trade-offs.</li>
+            </ul>
+          </div>
+
+          <div class="card-foot">
+            <p id="humor-quote" class="foot-quote">"Start grinding."</p>
+            <button id="copy-slip-btn" class="action-btn">Copy Reality Check</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
