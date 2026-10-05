@@ -35,7 +35,7 @@ body {
   min-height: 100vh;
 }
 
-/* Top bar (Desktop) */
+/* Top bar */
 .site-nav {
   position: fixed;
   top: 0;
@@ -58,14 +58,6 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.brand-dot {
-  width: 9px;
-  height: 9px;
-  background-color: var(--c-light-cream);
-  border-radius: 50%;
 }
 
 .brand-name {
@@ -661,11 +653,8 @@ input[type="range"] {
   width: 100%;
 }
 
-/* ========================================================
-   Enhanced Mobile & Thin-Screen Responsiveness (≤ 860px)
-======================================================== */
+/* Mobile & Thin-Screen Responsiveness (≤ 860px) */
 @media (max-width: 860px) {
-  /* Navigation */
   .site-nav {
     padding: 12px 16px;
   }
@@ -684,7 +673,6 @@ input[type="range"] {
     white-space: nowrap;
   }
 
-  /* Hero Section */
   .hero-screen {
     min-height: auto;
     padding: 90px 16px 40px 16px;
@@ -702,7 +690,6 @@ input[type="range"] {
     margin-bottom: 22px;
   }
 
-  /* Natural Mobile Scroll */
   .dashboard-section {
     height: auto;
     max-height: none;
@@ -716,7 +703,6 @@ input[type="range"] {
     gap: 14px;
   }
 
-  /* Search Bar for Mobile */
   .search-wrap {
     flex-direction: row;
     border-radius: 12px;
@@ -734,14 +720,12 @@ input[type="range"] {
     flex-shrink: 0;
   }
 
-  /* Stack Grid into Single Column */
   .dashboard-grid {
     grid-template-columns: 1fr;
     height: auto;
     gap: 14px;
   }
 
-  /* Watch Card Layout */
   .watch-card {
     height: auto;
     border-radius: 14px;
@@ -787,7 +771,6 @@ input[type="range"] {
     white-space: normal;
   }
 
-  /* Spec Tiles Grid */
   .specs-row {
     grid-template-columns: repeat(2, 1fr);
     gap: 6px;
@@ -803,7 +786,6 @@ input[type="range"] {
     word-break: break-word;
   }
 
-  /* Right Column Stack */
   .right-col {
     height: auto;
     gap: 14px;
@@ -842,7 +824,6 @@ input[type="range"] {
     font-size: 7.5px;
   }
 
-  /* Trade-Offs Card */
   .tradeoffs-card {
     height: auto;
     flex: none;
@@ -880,7 +861,7 @@ input[type="range"] {
   }
 }
 
-/* Extra Thin Mobile Screens (≤ 380px e.g., iPhone SE) */
+/* Extra Thin Mobile Screens (≤ 380px) */
 @media (max-width: 380px) {
   .hero-headline {
     font-size: 26px;
