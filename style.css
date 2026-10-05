@@ -11,11 +11,15 @@
   --font-num: 'Space Mono', monospace;
 }
 
-/* Reset */
+/* Reset & Utilities */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+.hidden {
+  display: none !important;
 }
 
 html {
@@ -214,7 +218,7 @@ body {
 }
 
 .search-dropdown.hidden {
-  display: none;
+  display: none !important;
 }
 
 .search-item {
@@ -303,16 +307,20 @@ body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
 }
 
 .image-frame img {
-  max-width: 90%;
-  max-height: 90%;
+  max-width: 85%;
+  max-height: 85%;
   object-fit: contain;
+  margin: auto;
+  display: block;
 }
 
 .image-frame img.hidden {
-  display: none;
+  display: none !important;
 }
 
 .img-empty {
@@ -321,6 +329,11 @@ body {
   opacity: 0.75;
   text-align: center;
   padding: 8px;
+  position: absolute;
+}
+
+.img-empty.hidden {
+  display: none !important;
 }
 
 .watch-details {

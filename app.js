@@ -104,14 +104,33 @@ function displayWatch(watch) {
   specCategory.textContent = watch.category || '--';
   specOrigin.textContent = watch.origin || '--';
 
-  const imageUrl = watch.image_url || watch.image;
-  if (imageUrl) {
-    watchImg.src = imageUrl;
-    watchImg.classList.remove('hidden');
-    imagePlaceholder.classList.add('hidden');
+  /* Image Resolution */
+  const rawImagePath = watch.image || watch.image_url || watch.img || '';
+
+  if (rawImagePath && typeof rawImagePath === 'string' && rawImagePath.trim() !== '') {
+    const fileName = rawImagePath.split('/').pop().trim();
+    const localSrc = `images/${fileName}`;
+
+    watchImg.onload = () => {
+      watchImg.classList.remove('hidden');
+      watchImg.style.display = 'block';
+      imagePlaceholder.classList.add('hidden');
+      imagePlaceholder.style.display = 'none';
+    };
+
+    watchImg.onerror = () => {
+      watchImg.classList.add('hidden');
+      watchImg.style.display = 'none';
+      imagePlaceholder.classList.remove('hidden');
+      imagePlaceholder.style.display = 'block';
+    };
+
+    watchImg.src = localSrc;
   } else {
     watchImg.classList.add('hidden');
+    watchImg.style.display = 'none';
     imagePlaceholder.classList.remove('hidden');
+    imagePlaceholder.style.display = 'block';
   }
 
   calculateReality();
