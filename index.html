@@ -58,7 +58,7 @@
       <!-- Dashboard grid -->
       <div class="dashboard-grid">
         
-        <!-- Watch card -->
+        <!-- Left Column: Watch card -->
         <div class="card watch-card">
           <!-- Spotlight top -->
           <div class="watch-spotlight-top">
@@ -83,7 +83,7 @@
             </div>
           </div>
 
-          <!-- Specs bottom -->
+          <!-- Specs bottom (White/Ivory Section) -->
           <div class="watch-specs-bottom">
             <div class="title-wrap">
               <h2 id="watch-model" class="watch-title">Select a watch</h2>
@@ -119,62 +119,75 @@
           </div>
         </div>
 
-        <!-- Calculator card -->
-        <div class="card calc-card">
-          <div class="card-tag-row">
-            <span class="tag-brand">FINANCIAL REALITY AUDIT</span>
-            <span id="verdict-badge" class="tag-status">Awaiting Input</span>
-          </div>
+        <!-- Right Column: Separated Cards -->
+        <div class="right-col">
+          
+          <!-- Top Card: Financial Reality Audit -->
+          <div class="card calc-card">
+            <div class="card-tag-row">
+              <span class="tag-brand">FINANCIAL REALITY AUDIT</span>
+              <span id="verdict-badge" class="tag-status">Awaiting Input</span>
+            </div>
 
-          <div class="inputs-stack">
-            <div class="input-item">
-              <label for="monthly-salary">Your Monthly Salary (PHP)</label>
-              <div class="input-box">
-                <span class="currency-sym">₱</span>
-                <input type="number" id="monthly-salary" placeholder="30,000" min="1" />
+            <div class="inputs-stack">
+              <div class="input-item">
+                <label for="monthly-salary">Your Monthly Salary (PHP)</label>
+                <div class="input-box">
+                  <span class="currency-sym">₱</span>
+                  <input type="number" id="monthly-salary" placeholder="30,000" min="1" />
+                </div>
+              </div>
+
+              <div class="input-item">
+                <div class="slider-info">
+                  <label for="savings-rate">Watch Savings Cut</label>
+                  <span id="savings-display" class="slider-pct">20%</span>
+                </div>
+                <input type="range" id="savings-rate" min="5" max="100" value="20" step="5" />
+                <div class="slider-steps">
+                  <span>5% (Easy)</span>
+                  <span>20% (Normal)</span>
+                  <span>50% (Hard)</span>
+                  <span>100% (No Food)</span>
+                </div>
               </div>
             </div>
 
-            <div class="input-item">
-              <div class="slider-info">
-                <label for="savings-rate">Watch Savings Cut</label>
-                <span id="savings-display" class="slider-pct">20%</span>
+            <div class="stats-banner">
+              <div class="stat-unit">
+                <span id="out-years" class="stat-val">--</span>
+                <span class="stat-lbl">Years of Work</span>
               </div>
-              <input type="range" id="savings-rate" min="5" max="100" value="20" step="5" />
-              <div class="slider-steps">
-                <span>5% (Easy)</span>
-                <span>20% (Normal)</span>
-                <span>50% (Hard)</span>
-                <span>100% (No Food)</span>
+              <div class="stat-unit">
+                <span id="out-cutoffs" class="stat-val">--</span>
+                <span class="stat-lbl">Paydays Needed</span>
+              </div>
+              <div class="stat-unit">
+                <span id="out-hours" class="stat-val">--</span>
+                <span class="stat-lbl">Work Hours</span>
               </div>
             </div>
           </div>
 
-          <div class="stats-banner">
-            <div class="stat-unit">
-              <span id="out-years" class="stat-val">--</span>
-              <span class="stat-lbl">Years of Work</span>
+          <!-- Bottom Card: Trade-Off Statement -->
+          <div class="card tradeoffs-card">
+            <div class="card-tag-row">
+              <span class="tag-brand">TRADE-OFF STATEMENT</span>
+              <span id="tradeoff-equiv-tag" class="tag-sub">Equivalent in Market Value</span>
             </div>
-            <div class="stat-unit">
-              <span id="out-cutoffs" class="stat-val">--</span>
-              <span class="stat-lbl">Paydays Needed</span>
+
+            <div class="tradeoffs-box">
+              <span class="tradeoffs-head">Or you could buy instead:</span>
+              <ul id="equivalents-items" class="tradeoffs-list">
+                <li>Enter your salary above to view trade-offs.</li>
+              </ul>
             </div>
-            <div class="stat-unit">
-              <span id="out-hours" class="stat-val">--</span>
-              <span class="stat-lbl">Work Hours</span>
+
+            <div class="card-foot">
+              <p id="humor-quote" class="foot-quote">"Start grinding."</p>
             </div>
           </div>
 
-          <div class="tradeoffs-box">
-            <span class="tradeoffs-head">Or you could buy instead:</span>
-            <ul id="equivalents-items" class="tradeoffs-list">
-              <li>Enter your salary above to view trade-offs.</li>
-            </ul>
-          </div>
-
-          <div class="card-foot">
-            <p id="humor-quote" class="foot-quote">"Start grinding."</p>
-          </div>
         </div>
 
       </div>
