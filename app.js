@@ -34,7 +34,6 @@ const outCutoffs = document.getElementById('out-cutoffs');
 const outHours = document.getElementById('out-hours');
 const equivalentsList = document.getElementById('equivalents-items');
 const humorQuote = document.getElementById('humor-quote');
-const copyBtn = document.getElementById('copy-slip-btn');
 
 /* State */
 let selectedWatch = null;
@@ -209,30 +208,6 @@ function calculateReality() {
   }
 }
 
-/* Copy summary */
-function copyRealitySummary() {
-  if (!selectedWatch || !salaryInput.value) {
-    alert('Please enter your salary first.');
-    return;
-  }
-
-  const brand = selectedWatch.brand || '';
-  const model = selectedWatch.model || '';
-  const price = watchPrice.textContent;
-  const years = outYears.textContent;
-  const cutoffs = outCutoffs.textContent;
-
-  const text = `Broke O'Clock Reality Check:\nTo buy a ${brand} ${model} (${price}) saving ${savingsSlider.value}% of my salary, I need to work for ${years} years (${cutoffs} paydays).\n\nCheck your delusion: ${window.location.href}`;
-
-  navigator.clipboard.writeText(text).then(() => {
-    const originalText = copyBtn.textContent;
-    copyBtn.textContent = 'Copied to Clipboard!';
-    setTimeout(() => {
-      copyBtn.textContent = originalText;
-    }, 2000);
-  });
-}
-
 /* Render search dropdown items */
 function showDropdown(items) {
   searchDropdown.innerHTML = '';
@@ -295,7 +270,6 @@ searchInput.addEventListener('keydown', async (e) => {
 
 salaryInput.addEventListener('input', calculateReality);
 savingsSlider.addEventListener('input', calculateReality);
-copyBtn.addEventListener('click', copyRealitySummary);
 
 /* Close dropdown on outside click */
 document.addEventListener('click', (e) => {

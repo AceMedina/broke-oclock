@@ -534,9 +534,12 @@ input[type="range"] {
   text-transform: uppercase;
 }
 
-/* Tradeoffs */
+/* Tradeoffs - Fixed stable dimensions */
 .tradeoffs-box {
   font-size: 12px;
+  min-height: 124px;
+  display: flex;
+  flex-direction: column;
 }
 
 .tradeoffs-head {
@@ -554,6 +557,7 @@ input[type="range"] {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
 }
 
 .tradeoffs-list li {
@@ -570,37 +574,20 @@ input[type="range"] {
   color: var(--c-dark-green);
 }
 
-/* Bottom area */
+/* Bottom area - Fixed stable dimensions */
 .card-foot {
   border-top: 1px solid var(--c-border);
   padding-top: 10px;
+  min-height: 44px;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  align-items: center;
 }
 
 .foot-quote {
   font-size: 11px;
   font-style: italic;
   color: var(--c-muted);
-}
-
-.action-btn {
-  width: 100%;
-  padding: 12px;
-  background-color: var(--c-dark-green);
-  border: none;
-  border-radius: 10px;
-  color: var(--c-light-cream);
-  font-family: var(--font-main);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.action-btn:hover {
-  opacity: 0.92;
+  line-height: 1.35;
 }
 
 /* Mobile */
