@@ -35,7 +35,7 @@ body {
   min-height: 100vh;
 }
 
-/* Top bar (Restored Original Sizing) */
+/* Top bar (Desktop) */
 .site-nav {
   position: fixed;
   top: 0;
@@ -145,7 +145,7 @@ body {
   height: 20px;
 }
 
-/* Dashboard area - Exactly 1-screen viewport */
+/* Dashboard area - Exact 1-screen viewport desktop */
 .dashboard-section {
   height: 100vh;
   max-height: 100vh;
@@ -167,7 +167,7 @@ body {
   justify-content: center;
 }
 
-/* Search bar (Restored Original Sizing) */
+/* Search bar */
 .search-row {
   width: 100%;
   flex-shrink: 0;
@@ -264,9 +264,7 @@ body {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
 }
 
-/* ========================================================
-   Left Column: Watch Card
-======================================================== */
+/* Left Column: Watch Card */
 .watch-card {
   overflow: hidden;
   padding: 0;
@@ -275,7 +273,6 @@ body {
   height: 100%;
 }
 
-/* Green spotlight top */
 .watch-spotlight-top {
   background-color: var(--c-dark-green);
   padding: 12px 18px 14px 18px;
@@ -310,7 +307,6 @@ body {
   flex: 1;
 }
 
-/* Hero image frame */
 .image-frame {
   width: 128px;
   height: 128px;
@@ -370,7 +366,6 @@ body {
   color: #C1BDA8;
 }
 
-/* White/Ivory bottom section with title + specs */
 .watch-specs-bottom {
   padding: 10px 18px 10px 18px;
   display: flex;
@@ -442,9 +437,7 @@ body {
   text-overflow: ellipsis;
 }
 
-/* ========================================================
-   Right Column: Stacked Cards
-======================================================== */
+/* Right Column: Stacked Cards */
 .right-col {
   display: flex;
   flex-direction: column;
@@ -668,36 +661,259 @@ input[type="range"] {
   width: 100%;
 }
 
-/* Mobile fallback */
+/* ========================================================
+   Enhanced Mobile & Thin-Screen Responsiveness (≤ 860px)
+======================================================== */
 @media (max-width: 860px) {
-  .hero-headline {
-    font-size: 36px;
+  /* Navigation */
+  .site-nav {
+    padding: 12px 16px;
   }
 
+  .nav-inner {
+    gap: 8px;
+  }
+
+  .brand-name {
+    font-size: 15px;
+  }
+
+  .nav-sahod-tag {
+    font-size: 9px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+
+  /* Hero Section */
+  .hero-screen {
+    min-height: auto;
+    padding: 90px 16px 40px 16px;
+  }
+
+  .hero-headline {
+    font-size: 32px;
+    line-height: 1.15;
+    letter-spacing: -1px;
+    margin-bottom: 14px;
+  }
+
+  .hero-quote {
+    font-size: 14px;
+    margin-bottom: 22px;
+  }
+
+  /* Natural Mobile Scroll */
   .dashboard-section {
     height: auto;
     max-height: none;
     overflow: visible;
-    padding: 70px 16px 30px 16px;
+    padding: 30px 12px 50px 12px;
   }
 
   .dashboard-shell {
     height: auto;
+    max-width: 100%;
+    gap: 14px;
   }
 
+  /* Search Bar for Mobile */
+  .search-wrap {
+    flex-direction: row;
+    border-radius: 12px;
+  }
+
+  #watch-search {
+    padding: 11px 14px;
+    font-size: 13px;
+    min-width: 0;
+  }
+
+  .search-action-btn {
+    padding: 0 18px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* Stack Grid into Single Column */
   .dashboard-grid {
     grid-template-columns: 1fr;
     height: auto;
+    gap: 14px;
   }
 
-  .watch-card,
-  .calc-card,
-  .tradeoffs-card {
+  /* Watch Card Layout */
+  .watch-card {
     height: auto;
+    border-radius: 14px;
+  }
+
+  .watch-spotlight-top {
+    padding: 16px;
+    flex: none;
   }
 
   .spotlight-body {
     flex-direction: column;
     text-align: center;
+    gap: 14px;
+  }
+
+  .image-frame {
+    width: 118px;
+    height: 118px;
+  }
+
+  .price-number {
+    font-size: 26px;
+  }
+
+  .watch-specs-bottom {
+    padding: 14px 14px;
+    flex: none;
+    gap: 10px;
+  }
+
+  .title-wrap {
+    text-align: center;
+  }
+
+  .watch-title {
+    font-size: 18px;
+    white-space: normal;
+  }
+
+  .watch-nick {
+    font-size: 12px;
+    white-space: normal;
+  }
+
+  /* Spec Tiles Grid */
+  .specs-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .spec-tile {
+    padding: 8px 10px;
+  }
+
+  .tile-val {
+    font-size: 11px;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Right Column Stack */
+  .right-col {
+    height: auto;
+    gap: 14px;
+  }
+
+  .calc-card {
+    height: auto;
+    flex: none;
+    padding: 16px 14px;
+    gap: 12px;
+    border-radius: 14px;
+  }
+
+  .inputs-stack {
+    gap: 10px;
+  }
+
+  .input-box {
+    padding: 0 10px;
+  }
+
+  .input-box input {
+    font-size: 16px;
+  }
+
+  .stats-banner {
+    padding: 10px 4px;
+    gap: 4px;
+  }
+
+  .stat-val {
+    font-size: 15px;
+  }
+
+  .stat-lbl {
+    font-size: 7.5px;
+  }
+
+  /* Trade-Offs Card */
+  .tradeoffs-card {
+    height: auto;
+    flex: none;
+    padding: 16px 14px;
+    gap: 10px;
+    border-radius: 14px;
+  }
+
+  .tradeoffs-box {
+    height: auto;
+    min-height: auto;
+  }
+
+  .tradeoffs-list {
+    gap: 6px;
+  }
+
+  .tradeoffs-list li {
+    font-size: 12px;
+    white-space: normal;
+    line-height: 1.35;
+    text-overflow: unset;
+  }
+
+  .card-foot {
+    height: auto;
+    padding-top: 8px;
+  }
+
+  .foot-quote {
+    font-size: 11px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.35;
+  }
+}
+
+/* Extra Thin Mobile Screens (≤ 380px e.g., iPhone SE) */
+@media (max-width: 380px) {
+  .hero-headline {
+    font-size: 26px;
+  }
+
+  .search-wrap {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .search-action-btn {
+    border-radius: 0 0 12px 12px;
+    padding: 10px;
+    width: 100%;
+  }
+
+  .specs-row {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-banner {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .stat-unit {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 4px;
+  }
+
+  .stat-unit:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
   }
 }
