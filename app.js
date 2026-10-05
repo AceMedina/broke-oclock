@@ -15,10 +15,14 @@ const imagePlaceholder = document.getElementById('image-placeholder');
 const watchModel = document.getElementById('watch-model');
 const watchNickname = document.getElementById('watch-nickname');
 const watchPrice = document.getElementById('watch-price');
+
+/* DOM Elements - 6 Spec Tiles */
 const specCase = document.getElementById('spec-case');
 const specMovement = document.getElementById('spec-movement');
 const specCategory = document.getElementById('spec-category');
 const specOrigin = document.getElementById('spec-origin');
+const specRef = document.getElementById('spec-ref');
+const specReserve = document.getElementById('spec-reserve');
 
 /* DOM Elements - Calculator */
 const salaryInput = document.getElementById('monthly-salary');
@@ -104,7 +108,15 @@ function displayWatch(watch) {
   specCategory.textContent = watch.category || '--';
   specOrigin.textContent = watch.origin || '--';
 
-  /* Image Resolution */
+  /* Additional balanced attributes */
+  specRef.textContent = watch.reference_number || watch.reference || watch.ref || 'Ref. Standard';
+  
+  const powerReserve = watch.power_reserve_hours || watch.power_reserve || watch.complication;
+  specReserve.textContent = powerReserve 
+    ? (typeof powerReserve === 'number' ? `${powerReserve} Hours` : powerReserve)
+    : '70 Hours';
+
+  /* Local image path resolver */
   const rawImagePath = watch.image || watch.image_url || watch.img || '';
 
   if (rawImagePath && typeof rawImagePath === 'string' && rawImagePath.trim() !== '') {

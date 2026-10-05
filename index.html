@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -34,7 +34,6 @@
       </p>
       <a href="#dashboard" class="hero-cta">Calculate Your Reality ↓</a>
     </div>
-
     <div class="hero-spacer"></div>
   </section>
 
@@ -61,47 +60,61 @@
         
         <!-- Watch card -->
         <div class="card watch-card">
-          <div class="card-tag-row">
-            <span id="watch-brand" class="tag-brand">WATCH BRAND</span>
-            <span id="spec-year" class="tag-year">YEAR</span>
-          </div>
-
-          <div class="watch-body">
-            <div class="image-frame">
-              <img id="watch-img" src="" alt="Selected Watch" class="hidden" />
-              <div id="image-placeholder" class="img-empty">
-                <span>Select a watch from search</span>
-              </div>
+          <!-- Spotlight top -->
+          <div class="watch-spotlight-top">
+            <div class="spotlight-meta">
+              <span id="watch-brand" class="spotlight-tag">WATCH BRAND</span>
+              <span id="spec-year" class="spotlight-tag">YEAR</span>
             </div>
 
-            <div class="watch-details">
+            <div class="spotlight-body">
+              <div class="image-frame">
+                <img id="watch-img" src="" alt="Selected Watch" class="hidden" />
+                <div id="image-placeholder" class="img-empty">
+                  <span>Select a watch from search</span>
+                </div>
+              </div>
+
+              <div class="price-container">
+                <span class="price-label">MARKET VALUATION</span>
+                <span id="watch-price" class="price-number">₱0</span>
+                <span class="price-sub">estimated market price</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Specs bottom -->
+          <div class="watch-specs-bottom">
+            <div class="title-wrap">
               <h2 id="watch-model" class="watch-title">Select a watch</h2>
               <p id="watch-nickname" class="watch-nick"></p>
-              
-              <div class="price-container">
-                <span class="price-label">Market Value</span>
-                <span id="watch-price" class="price-number">₱0</span>
-              </div>
             </div>
-          </div>
 
-          <!-- Specs list -->
-          <div class="specs-row">
-            <div class="spec-tile">
-              <span class="tile-label">Case Size</span>
-              <span id="spec-case" class="tile-val">-- mm</span>
-            </div>
-            <div class="spec-tile">
-              <span class="tile-label">Movement</span>
-              <span id="spec-movement" class="tile-val">--</span>
-            </div>
-            <div class="spec-tile">
-              <span class="tile-label">Type</span>
-              <span id="spec-category" class="tile-val">--</span>
-            </div>
-            <div class="spec-tile">
-              <span class="tile-label">Made In</span>
-              <span id="spec-origin" class="tile-val">--</span>
+            <div class="specs-row">
+              <div class="spec-tile">
+                <span class="tile-label">Case Size</span>
+                <span id="spec-case" class="tile-val">-- mm</span>
+              </div>
+              <div class="spec-tile">
+                <span class="tile-label">Movement</span>
+                <span id="spec-movement" class="tile-val">--</span>
+              </div>
+              <div class="spec-tile">
+                <span class="tile-label">Type</span>
+                <span id="spec-category" class="tile-val">--</span>
+              </div>
+              <div class="spec-tile">
+                <span class="tile-label">Made In</span>
+                <span id="spec-origin" class="tile-val">--</span>
+              </div>
+              <div class="spec-tile">
+                <span class="tile-label">Reference</span>
+                <span id="spec-ref" class="tile-val">--</span>
+              </div>
+              <div class="spec-tile">
+                <span class="tile-label">Power Reserve</span>
+                <span id="spec-reserve" class="tile-val">--</span>
+              </div>
             </div>
           </div>
         </div>
@@ -109,7 +122,7 @@
         <!-- Calculator card -->
         <div class="card calc-card">
           <div class="card-tag-row">
-            <span class="tag-brand">SALARY CALCULATOR</span>
+            <span class="tag-brand">FINANCIAL REALITY AUDIT</span>
             <span id="verdict-badge" class="tag-status">Awaiting Input</span>
           </div>
 
@@ -140,11 +153,11 @@
           <div class="stats-banner">
             <div class="stat-unit">
               <span id="out-years" class="stat-val">--</span>
-              <span class="stat-lbl">Years</span>
+              <span class="stat-lbl">Years of Work</span>
             </div>
             <div class="stat-unit">
               <span id="out-cutoffs" class="stat-val">--</span>
-              <span class="stat-lbl">Paydays</span>
+              <span class="stat-lbl">Paydays Needed</span>
             </div>
             <div class="stat-unit">
               <span id="out-hours" class="stat-val">--</span>
