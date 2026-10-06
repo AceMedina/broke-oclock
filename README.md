@@ -35,7 +35,7 @@ Watch details and market prices come from a FastAPI backend (`https://watch-api-
 ---
 
 ## Files in This Project
-
+```text
 broke-o-clock/
 ├── images/       # Watch photos and renders
 ├── index.html    # Page structure and layout
