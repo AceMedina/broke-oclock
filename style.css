@@ -959,33 +959,7 @@ input[type="range"] {
   cursor: pointer;
 }
 
-/* Horizon Tabs (Affordable Modal) */
-.horizon-tabs {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-}
-
-.horizon-tab {
-  font-family: var(--font-num);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid var(--c-border);
-  background-color: var(--c-tile-bg);
-  color: var(--c-charcoal);
-  cursor: pointer;
-  transition: background-color 0.15s, color 0.15s;
-}
-
-.horizon-tab.active {
-  background-color: var(--c-dark-green);
-  color: var(--c-light-cream);
-  border-color: var(--c-dark-green);
-}
-
-/* Grail Goals & Affordable Cards */
+/* Grail Goals & Closest Watches Cards */
 .goals-list {
   display: flex;
   flex-direction: column;

@@ -16,7 +16,7 @@ const authSwitchPrompt = document.getElementById('auth-switch-prompt');
 const authSwitchBtn = document.getElementById('auth-switch-btn');
 const authMessage = document.getElementById('auth-message');
 
-/* DOM Elements - Search, Favorites, Goals, and Affordable Finder */
+/* DOM Elements - Search, Favorites, Goals, and Closest Watches */
 const searchInput = document.getElementById('watch-search');
 const searchBtn = document.getElementById('search-btn');
 const searchDropdown = document.getElementById('search-dropdown');
@@ -38,7 +38,6 @@ const affordableModal = document.getElementById('affordable-modal');
 const affordableCloseBtn = document.getElementById('affordable-close-btn');
 const affordableSummary = document.getElementById('affordable-summary');
 const affordableList = document.getElementById('affordable-list');
-const horizonTabs = document.querySelectorAll('.horizon-tab');
 
 /* DOM Elements - Watch Card */
 const watchBrand = document.getElementById('watch-brand');
@@ -75,7 +74,6 @@ let currentUser = null;
 let userFavorites = [];
 let userGoals = [];
 let isRegisterMode = false;
-let selectedHorizonMonths = 6;
 
 /* Request headers helper */
 function getApiHeaders() {
@@ -456,8 +454,8 @@ function renderGoalsList() {
   });
 }
 
-/* Open Reverse Budget Finder and fetch affordable watches */
-async function openAffordableFinder() {
+/* Open Top 5 Closest Watches Modal */
+async function openClosestWatchesModal() {
   const salary = parseFloat(salaryInput.value);
   if (!salary || salary <= 0) {
     salaryInput.focus();
@@ -466,76 +464,57 @@ async function openAffordableFinder() {
   }
 
   affordableModal.classList.remove('hidden');
-  await loadAffordableWatches(selectedHorizonMonths);
-}
-
-async function loadAffordableWatches(months) {
-  selectedHorizonMonths = months;
-  horizonTabs.forEach((tab) => {
-    tab.classList.toggle('active', parseInt(tab.dataset.months, 10) === months);
-  });
-
-  const salary = parseFloat(salaryInput.value);
-  const savingsPct = parseInt(savingsSlider.value, 10);
-  const monthlyAlloc = salary * (savingsPct / 100);
-  const maxBudget = monthlyAlloc * months;
-
-  affordableSummary.textContent = `Loading watches under ${formatCurrency(maxBudget)} (${months} months at ${formatCurrency(monthlyAlloc)}/mo)...`;
   affordableList.innerHTML = '';
 
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/watches/affordable?max_price=${encodeURIComponent(maxBudget)}`,
-      {
-        method: 'GET',
-        headers: getApiHeaders()
-      }
-    );
+  const savingsPct = parseInt(savingsSlider.value, 10);
+  const monthlyAlloc = salary * (savingsPct / 100);
 
-    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-    const data = await response.json();
-    const matches = data.watches || [];
-
-    if (matches.length === 0) {
-      affordableSummary.textContent = `Your ${months}-month watch budget is ${formatCurrency(maxBudget)}. No catalog watches fit yet—try 1 Year, 2 Years, or raise your savings cut.`;
-      return;
-    }
-
-    affordableSummary.textContent = `Found ${matches.length} watch${matches.length === 1 ? '' : 'es'} within your ${months}-month budget of ${formatCurrency(maxBudget)}:`;
-
-    matches.forEach((watch) => {
-      const price = parseFloat(watch.price_php || 0);
-      const monthsNeeded = (price / monthlyAlloc).toFixed(1);
-      const paydaysNeeded = Math.ceil((price / monthlyAlloc) * 2);
-
-      const card = document.createElement('div');
-      card.className = 'goal-item';
-      card.innerHTML = `
-        <div class="goal-item-top">
-          <div>
-            <div class="goal-watch-name">${watch.brand} ${watch.model}</div>
-            <div class="goal-watch-meta">
-              ${formatCurrency(price)} • ${monthsNeeded} mos (${paydaysNeeded} paydays) • ${watch.category || 'Watch'}
-            </div>
-          </div>
-          <span class="goal-verdict-pill">${watch.year || ''}</span>
-        </div>
-        <div class="goal-actions">
-          <button type="button" class="goal-btn goal-btn-deposit">Load in Calculator</button>
-        </div>
-      `;
-
-      card.querySelector('.goal-btn-deposit').addEventListener('click', () => {
-        displayWatch(watch);
-        affordableModal.classList.add('hidden');
-      });
-
-      affordableList.appendChild(card);
-    });
-  } catch (error) {
-    console.error('Affordable watches fetch error:', error);
-    affordableSummary.textContent = 'Unable to load affordable watches right now.';
+  if (allWatchesCache.length === 0) {
+    affordableSummary.textContent = 'Loading catalog...';
+    await fetchAllWatches();
   }
+
+  if (allWatchesCache.length === 0) {
+    affordableSummary.textContent = 'No watches available right now.';
+    return;
+  }
+
+  const topFive = [...allWatchesCache]
+    .sort((a, b) => parseFloat(a.price_php || 0) - parseFloat(b.price_php || 0))
+    .slice(0, 5);
+
+  affordableSummary.textContent = `Ranked by fastest time to own saving ${formatCurrency(monthlyAlloc)}/month (${savingsPct}% of ${formatCurrency(salary)}):`;
+
+  topFive.forEach((watch, index) => {
+    const price = parseFloat(watch.price_php || 0);
+    const monthsNeeded = price / monthlyAlloc;
+    const yearsNeeded = (monthsNeeded / 12).toFixed(1);
+    const paydaysNeeded = Math.ceil(monthsNeeded * 2);
+
+    const card = document.createElement('div');
+    card.className = 'goal-item';
+    card.innerHTML = `
+      <div class="goal-item-top">
+        <div>
+          <div class="goal-watch-name">#${index + 1} ${watch.brand} ${watch.model}</div>
+          <div class="goal-watch-meta">
+            Price: ${formatCurrency(price)} • ${paydaysNeeded.toLocaleString()} paydays (${Math.ceil(monthsNeeded)} mos)
+          </div>
+        </div>
+        <span class="goal-verdict-pill">${yearsNeeded} yrs</span>
+      </div>
+      <div class="goal-actions">
+        <button type="button" class="goal-btn goal-btn-deposit">Load in Calculator</button>
+      </div>
+    `;
+
+    card.querySelector('.goal-btn-deposit').addEventListener('click', () => {
+      displayWatch(watch);
+      affordableModal.classList.add('hidden');
+    });
+
+    affordableList.appendChild(card);
+  });
 }
 
 /* Fetch all watches */
@@ -815,7 +794,7 @@ authForm.addEventListener('submit', async (e) => {
   }
 });
 
-/* Favorites, Goals, and Affordable Finder Event Listeners */
+/* Favorites, Goals, and Closest Watches Event Listeners */
 favoritesBtn.addEventListener('click', () => {
   favoritesDropdown.classList.toggle('hidden');
   searchDropdown.classList.add('hidden');
@@ -841,7 +820,7 @@ goalsModal.addEventListener('click', (e) => {
   }
 });
 
-affordableBtn.addEventListener('click', openAffordableFinder);
+affordableBtn.addEventListener('click', openClosestWatchesModal);
 
 affordableCloseBtn.addEventListener('click', () => {
   affordableModal.classList.add('hidden');
@@ -851,13 +830,6 @@ affordableModal.addEventListener('click', (e) => {
   if (e.target === affordableModal) {
     affordableModal.classList.add('hidden');
   }
-});
-
-horizonTabs.forEach((tab) => {
-  tab.addEventListener('click', () => {
-    const months = parseInt(tab.dataset.months, 10);
-    loadAffordableWatches(months);
-  });
 });
 
 /* Search and Calculator Event Listeners */

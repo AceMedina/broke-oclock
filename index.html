@@ -146,7 +146,7 @@
             <div class="card-tag-row">
               <span class="tag-brand">FINANCIAL REALITY AUDIT</span>
               <div class="calc-tag-actions">
-                <button type="button" id="affordable-btn" class="affordable-btn" title="Find watches you can afford">Affordable Picks</button>
+                <button type="button" id="affordable-btn" class="affordable-btn" title="See top 5 closest watches">Closest Picks</button>
                 <button type="button" id="pin-goal-btn" class="pin-goal-btn" title="Pin current calculation as a goal">+ Pin Goal</button>
                 <span id="verdict-badge" class="tag-status">Awaiting Input</span>
               </div>
@@ -281,26 +281,20 @@
     </div>
   </div>
 
-  <!-- Affordable Picks Modal -->
+  <!-- Top 5 Closest Watches Modal -->
   <div id="affordable-modal" class="modal-backdrop hidden">
     <div class="modal-card goals-modal-card">
       <div class="modal-head">
         <div>
-          <span class="modal-tag">REVERSE BUDGET FINDER</span>
-          <h2 class="modal-title">What You Can Actually Afford</h2>
+          <span class="modal-tag">REALISTIC TARGETS</span>
+          <h2 class="modal-title">Top 5 Closest Watches</h2>
         </div>
-        <button type="button" id="affordable-close-btn" class="modal-close-btn" aria-label="Close affordable modal">✕</button>
+        <button type="button" id="affordable-close-btn" class="modal-close-btn" aria-label="Close closest watches modal">✕</button>
       </div>
 
       <div class="modal-body goals-modal-body">
-        <div class="horizon-tabs">
-          <button type="button" class="horizon-tab active" data-months="6">6 Months</button>
-          <button type="button" class="horizon-tab" data-months="12">1 Year</button>
-          <button type="button" class="horizon-tab" data-months="24">2 Years</button>
-        </div>
-
         <p id="affordable-summary" class="modal-subtitle">
-          Enter your monthly salary to see watches within reach.
+          Enter your monthly salary to see the top 5 fastest watches to reach.
         </p>
 
         <div id="affordable-list" class="goals-list"></div>
