@@ -2,6 +2,7 @@
 const API_BASE_URL = 'https://watch-api-eight.vercel.app';
 const API_KEY = 'broke-oclock-003';
 const USER_STORAGE_KEY = 'watch_user';
+const CATALOG_CACHE_KEY = 'watch_catalog_cache';
 const MIN_SALARY_PHP = 1000;
 const MAX_SALARY_PHP = 100000000;
 
@@ -87,7 +88,7 @@ function initLoginPage() {
     authMessage.classList.remove('success');
     authMessage.textContent = '';
 
-   if (isRegisterMode) {
+    if (isRegisterMode) {
       tabRegister.classList.add('active');
       tabRegister.setAttribute('aria-selected', 'true');
       tabSignIn.classList.remove('active');
@@ -118,10 +119,17 @@ function initLoginPage() {
     authMessage.classList.add('hidden');
     authMessage.classList.remove('success');
 
-    if (isRegisterMode && !/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(password)) {
-      authMessage.textContent = 'Password must be at least 8 characters with 1 letter and 1 number.';
-      authMessage.classList.remove('hidden');
-      return;
+    if (isRegisterMode) {
+      if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+        authMessage.textContent = 'Username must be 3–20 characters using letters, numbers, or underscores.';
+        authMessage.classList.remove('hidden');
+        return;
+      }
+      if (!/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(password)) {
+        authMessage.textContent = 'Password must be at least 8 characters with 1 letter and 1 number.';
+        authMessage.classList.remove('hidden');
+        return;
+      }
     }
 
     authSubmitBtn.disabled = true;
@@ -807,24 +815,99 @@ function initDashboardPage() {
     });
   }
 
-  /* Watch catalog and search */
+  /* Load catalog via version cache, snapshot, API, or local fallback */
   async function fetchAllWatches() {
+    let localCache = null;
+    try {
+      const rawCache = localStorage.getItem(CATALOG_CACHE_KEY);
+      if (rawCache) {
+        const parsed = JSON.parse(rawCache);
+        if (parsed && Array.isArray(parsed.watches)) {
+          localCache = parsed;
+        }
+      }
+    } catch (error) {
+      localCache = null;
+    }
+
+    try {
+      const versionRes = await fetch(`${API_BASE_URL}/api/v1/watches/version`);
+      if (versionRes.ok) {
+        const versionData = await versionRes.json();
+        if (localCache && localCache.version === versionData.version && localCache.watches.length > 0) {
+          allWatchesCache = localCache.watches;
+          return allWatchesCache;
+        }
+      }
+
+      const snapshotRes = await fetch(`${API_BASE_URL}/api/v1/watches/snapshot`);
+      if (snapshotRes.ok) {
+        const snapshotData = await snapshotRes.json();
+        if (Array.isArray(snapshotData.watches) && snapshotData.watches.length > 0) {
+          allWatchesCache = snapshotData.watches;
+          try {
+            localStorage.setItem(
+              CATALOG_CACHE_KEY,
+              JSON.stringify({ version: snapshotData.version, watches: allWatchesCache })
+            );
+          } catch (error) {
+            console.error('Failed to store catalog cache:', error);
+          }
+          return allWatchesCache;
+        }
+      }
+    } catch (error) {
+      console.error('Catalog snapshot check failed:', error);
+    }
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/watches`, {
         method: 'GET',
         headers: getApiHeaders()
       });
-      if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-      const data = await response.json();
-      allWatchesCache = data.watches || [];
-      return allWatchesCache;
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data.watches) && data.watches.length > 0) {
+          allWatchesCache = data.watches;
+          return allWatchesCache;
+        }
+      }
     } catch (error) {
-      console.error('Failed to fetch watches:', error);
-      return [];
+      console.error('API catalog fallback failed:', error);
     }
+
+    if (localCache && localCache.watches.length > 0) {
+      allWatchesCache = localCache.watches;
+      return allWatchesCache;
+    }
+
+    try {
+      const staticRes = await fetch('watches.json');
+      if (staticRes.ok) {
+        const staticData = await staticRes.json();
+        allWatchesCache = Array.isArray(staticData) ? staticData : (staticData.watches || []);
+        return allWatchesCache;
+      }
+    } catch (error) {
+      console.error('Static watches.json fallback failed:', error);
+    }
+
+    return [];
   }
 
+  /* Search cached catalog first, then API */
   async function searchWatches(query) {
+    const q = query.toLowerCase();
+    if (allWatchesCache.length > 0) {
+      return allWatchesCache.filter((w) => {
+        const brand = (w.brand || '').toLowerCase();
+        const model = (w.model || '').toLowerCase();
+        const nick = (w.nickname || '').toLowerCase();
+        const ref = (w.reference_number || w.reference || '').toLowerCase();
+        return brand.includes(q) || model.includes(q) || nick.includes(q) || ref.includes(q);
+      });
+    }
+
     try {
       const response = await fetch(
         `${API_BASE_URL}/api/v1/watches/search?q=${encodeURIComponent(query)}`,
