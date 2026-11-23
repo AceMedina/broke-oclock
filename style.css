@@ -1144,6 +1144,13 @@ input[type="range"] {
   background-color: var(--c-olive-deep);
 }
 
+.goal-deposit-btn:disabled {
+  background-color: var(--c-tile);
+  color: var(--c-olive);
+  border-color: var(--c-border-soft);
+  cursor: not-allowed;
+}
+
 .goal-load-btn {
   background-color: var(--c-cream);
   color: var(--c-ink);

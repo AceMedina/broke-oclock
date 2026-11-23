@@ -1,9 +1,11 @@
-/* Configuration */
+/* API configuration */
 const API_BASE_URL = 'https://watch-api-eight.vercel.app';
 const API_KEY = 'broke-oclock-003';
 const USER_STORAGE_KEY = 'watch_user';
+const MIN_SALARY_PHP = 1000;
+const MAX_SALARY_PHP = 100000000;
 
-/* Shared Helpers */
+/* Shared helpers */
 function getApiHeaders() {
   return {
     'x-api-key': API_KEY,
@@ -33,9 +35,7 @@ function loadSavedUser() {
   }
 }
 
-/* =========================================================
-   PAGE 1: STANDALONE LOGIN / REGISTER FLOW (login.html)
-   ========================================================= */
+/* Login and register page */
 function initLoginPage() {
   const authForm = document.getElementById('auth-form');
   if (!authForm) return;
@@ -120,14 +120,11 @@ function initLoginPage() {
   });
 }
 
-/* =========================================================
-   PAGE 2: MAIN CALCULATOR WORKSPACE (index.html)
-   ========================================================= */
+/* Main calculator workspace */
 function initDashboardPage() {
   const watchSearch = document.getElementById('watch-search');
   if (!watchSearch) return;
 
-  /* Navbar Elements */
   const navFavoritesBtn = document.getElementById('nav-favorites-btn');
   const navGoalsBtn = document.getElementById('nav-goals-btn');
   const favoritesCount = document.getElementById('favorites-count');
@@ -135,11 +132,9 @@ function initDashboardPage() {
   const navUserBadge = document.getElementById('nav-user-badge');
   const navAuthBtn = document.getElementById('nav-auth-btn');
 
-  /* Search Elements */
   const searchBtn = document.getElementById('search-btn');
   const searchDropdown = document.getElementById('search-dropdown');
 
-  /* Watch Card Elements */
   const watchBrandYear = document.getElementById('watch-brand-year');
   const favoriteToggleBtn = document.getElementById('favorite-toggle-btn');
   const watchImg = document.getElementById('watch-img');
@@ -154,7 +149,6 @@ function initDashboardPage() {
   const specRef = document.getElementById('spec-ref');
   const specReserve = document.getElementById('spec-reserve');
 
-  /* Reality Audit Elements */
   const salaryInput = document.getElementById('monthly-salary');
   const savingsSlider = document.getElementById('savings-rate');
   const savingsDisplay = document.getElementById('savings-display');
@@ -165,14 +159,12 @@ function initDashboardPage() {
   const outCutoffs = document.getElementById('out-cutoffs');
   const outHours = document.getElementById('out-hours');
 
-  /* Trade-Offs Elements */
   const eqChicken = document.getElementById('eq-chicken');
   const eqCoffee = document.getElementById('eq-coffee');
   const eqIphones = document.getElementById('eq-iphones');
   const eqRent = document.getElementById('eq-rent');
   const humorQuote = document.getElementById('humor-quote');
 
-  /* Slide-Over Ledger Drawer Elements */
   const ledgerBackdrop = document.getElementById('ledger-backdrop');
   const ledgerCloseBtn = document.getElementById('ledger-close-btn');
   const drawerFavCount = document.getElementById('drawer-fav-count');
@@ -182,20 +174,31 @@ function initDashboardPage() {
   const goalsStatusMsg = document.getElementById('goals-status-msg');
   const goalsList = document.getElementById('goals-list');
 
-  /* Top 5 Closest Modal Elements */
   const affordableBackdrop = document.getElementById('affordable-backdrop');
   const affordableCloseBtn = document.getElementById('affordable-close-btn');
   const affordableSummary = document.getElementById('affordable-summary');
   const affordableList = document.getElementById('affordable-list');
 
-  /* State */
   let currentUser = null;
   let selectedWatch = null;
   let allWatchesCache = [];
   let userFavorites = [];
   let userGoals = [];
 
-  /* Sync Auth State in Navbar */
+  /* Validate salary bounds */
+  function getValidSalary() {
+    const raw = parseFloat(salaryInput.value);
+    if (!Number.isFinite(raw) || raw < MIN_SALARY_PHP) {
+      return null;
+    }
+    if (raw > MAX_SALARY_PHP) {
+      salaryInput.value = MAX_SALARY_PHP;
+      return MAX_SALARY_PHP;
+    }
+    return raw;
+  }
+
+  /* Sync user session */
   async function syncUserSession() {
     currentUser = loadSavedUser();
 
@@ -218,9 +221,9 @@ function initDashboardPage() {
     }
 
     updateFavoriteButtonState();
+    updatePinButtonState();
   }
 
-  /* Open & Close Slide-Over Ledger Drawer */
   function openLedgerDrawer(focusSection) {
     if (!currentUser || !currentUser.id) {
       window.location.href = 'login.html';
@@ -237,7 +240,7 @@ function initDashboardPage() {
     ledgerBackdrop.classList.add('hidden');
   }
 
-  /* Fetch & Render Favorites */
+  /* User favorites */
   async function fetchUserFavorites() {
     if (!currentUser || !currentUser.id) return;
 
@@ -314,7 +317,7 @@ function initDashboardPage() {
     }
   }
 
-  function updateFavoriteButtonState() {
+ function updateFavoriteButtonState() {
     if (!selectedWatch || !selectedWatch.id) {
       favoriteToggleBtn.textContent = '+ Favorite';
       favoriteToggleBtn.classList.remove('is-saved');
@@ -323,12 +326,22 @@ function initDashboardPage() {
 
     const isSaved = userFavorites.some((item) => item.id === selectedWatch.id);
     if (isSaved) {
-      favoriteToggleBtn.textContent = 'Favorited ★';
+      favoriteToggleBtn.textContent = 'In Favorites ★';
       favoriteToggleBtn.classList.add('is-saved');
     } else {
       favoriteToggleBtn.textContent = '+ Favorite';
       favoriteToggleBtn.classList.remove('is-saved');
     }
+  }
+
+  function updatePinButtonState() {
+    if (!selectedWatch || !selectedWatch.id || !currentUser) {
+      pinGoalBtn.textContent = '+ Pin Goal';
+      return;
+    }
+
+    const alreadyPinned = userGoals.some((g) => g.watch_id === selectedWatch.id);
+    pinGoalBtn.textContent = alreadyPinned ? 'Pinned ✓' : '+ Pin Goal';
   }
 
   async function toggleSelectedWatchFavorite() {
@@ -364,7 +377,7 @@ function initDashboardPage() {
     }
   }
 
-  /* Fetch & Render Grail Goals */
+  /* Grail goals */
   async function fetchUserGoals() {
     if (!currentUser || !currentUser.id) return;
 
@@ -378,6 +391,7 @@ function initDashboardPage() {
       userGoals = data.goals || [];
       goalsCount.textContent = userGoals.length;
       renderGoalsLedger();
+      updatePinButtonState();
     } catch (error) {
       console.error('Failed to fetch goals:', error);
     }
@@ -407,16 +421,18 @@ function initDashboardPage() {
       const rate = parseInt(goal.savings_rate || 20, 10);
       const monthlyAlloc = salary * (rate / 100);
       const cutoffAmt = monthlyAlloc / 2;
-      const remaining = Math.max(0, price - saved);
+      const isCompleted = price > 0 && saved >= price;
+      const clampedSaved = isCompleted ? price : saved;
+      const remaining = Math.max(0, price - clampedSaved);
       const monthsLeft = monthlyAlloc > 0 ? remaining / monthlyAlloc : 0;
-      const pct = price > 0 ? Math.min(100, (saved / price) * 100) : 0;
+      const pct = price > 0 ? Math.min(100, (clampedSaved / price) * 100) : 0;
 
       const card = document.createElement('div');
       card.className = 'goal-brutal-card';
       card.innerHTML = `
         <div class="goal-card-top">
           <span class="goal-card-title">${goal.brand} ${goal.model}</span>
-          <span class="goal-verdict-tag">${goal.verdict || 'GOAL'}</span>
+          <span class="goal-verdict-tag">${isCompleted ? 'GOAL REACHED' : (goal.verdict || 'GOAL')}</span>
         </div>
 
         <div class="goal-metrics-row">
@@ -436,7 +452,7 @@ function initDashboardPage() {
 
         <div class="goal-progress-block">
           <div class="goal-progress-text">
-            <span>${formatCurrency(saved)} / ${formatCurrency(price)}</span>
+            <span>${formatCurrency(clampedSaved)} / ${formatCurrency(price)}</span>
             <span>${Math.round(pct)}%</span>
           </div>
           <div class="goal-bar-track">
@@ -445,15 +461,20 @@ function initDashboardPage() {
         </div>
 
         <div class="goal-card-actions">
-          <button type="button" class="goal-deposit-btn">+ Log 15/30 Cutoff (${formatCurrency(cutoffAmt)})</button>
+          <button type="button" class="goal-deposit-btn" ${isCompleted ? 'disabled' : ''}>
+            ${isCompleted ? 'Goal Reached ✓' : `+ Log 15/30 Cutoff (${formatCurrency(cutoffAmt)})`}
+          </button>
           <button type="button" class="goal-load-btn">Load in Calculator</button>
           <button type="button" class="goal-remove-btn">Remove</button>
         </div>
       `;
 
-      card.querySelector('.goal-deposit-btn').addEventListener('click', () => {
-        logCutoffDeposit(goal.id);
-      });
+      const depositBtn = card.querySelector('.goal-deposit-btn');
+      if (!isCompleted) {
+        depositBtn.addEventListener('click', () => {
+          logCutoffDeposit(goal);
+        });
+      }
 
       card.querySelector('.goal-load-btn').addEventListener('click', () => {
         const matchedWatch = allWatchesCache.find((w) => w.id === goal.watch_id) || {
@@ -486,12 +507,18 @@ function initDashboardPage() {
       return;
     }
 
-    const salary = parseFloat(salaryInput.value);
+    const existingGoal = userGoals.find((g) => g.watch_id === selectedWatch.id);
+    if (existingGoal) {
+      openLedgerDrawer('goals');
+      return;
+    }
+
+    const salary = getValidSalary();
     const savingsPct = parseInt(savingsSlider.value, 10);
 
-    if (!salary || salary <= 0) {
+    if (!salary) {
       salaryInput.focus();
-      verdictBadge.textContent = 'ENTER SALARY FIRST';
+      verdictBadge.textContent = 'MIN SALARY ₱1,000';
       return;
     }
 
@@ -514,9 +541,6 @@ function initDashboardPage() {
       if (!response.ok) throw new Error('Failed to pin goal.');
       await fetchUserGoals();
       pinGoalBtn.textContent = 'Pinned ✓';
-      setTimeout(() => {
-        pinGoalBtn.textContent = '+ Pin Goal';
-      }, 1500);
     } catch (error) {
       console.error('Pin goal error:', error);
       pinGoalBtn.textContent = '+ Pin Goal';
@@ -525,11 +549,15 @@ function initDashboardPage() {
     }
   }
 
-  async function logCutoffDeposit(goalId) {
+  async function logCutoffDeposit(goal) {
     if (!currentUser || !currentUser.id) return;
 
+    const price = parseFloat(goal.price_php || 0);
+    const saved = parseFloat(goal.amount_saved || 0);
+    if (price > 0 && saved >= price) return;
+
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/broke-oclock/goals/${goalId}/deposit`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/broke-oclock/goals/${goal.id}/deposit`, {
         method: 'PATCH',
         headers: getApiHeaders(),
         body: JSON.stringify({ user_id: currentUser.id })
@@ -561,12 +589,12 @@ function initDashboardPage() {
     }
   }
 
-  /* Open Top 5 Closest Watches Modal (Frame 4) */
+  /* Budget-matched top 5 closest watches */
   async function openClosestWatchesModal() {
-    const salary = parseFloat(salaryInput.value);
-    if (!salary || salary <= 0) {
+    const salary = getValidSalary();
+    if (!salary) {
       salaryInput.focus();
-      verdictBadge.textContent = 'ENTER SALARY FIRST';
+      verdictBadge.textContent = 'MIN SALARY ₱1,000';
       return;
     }
 
@@ -575,6 +603,7 @@ function initDashboardPage() {
 
     const savingsPct = parseInt(savingsSlider.value, 10);
     const monthlyAlloc = salary * (savingsPct / 100);
+    const annualTargetBudget = monthlyAlloc * 12;
 
     if (allWatchesCache.length === 0) {
       affordableSummary.textContent = 'Loading watch catalog...';
@@ -586,11 +615,21 @@ function initDashboardPage() {
       return;
     }
 
-    const topFive = [...allWatchesCache]
-      .sort((a, b) => parseFloat(a.price_php || 0) - parseFloat(b.price_php || 0))
-      .slice(0, 5);
+    const sortedByPrice = [...allWatchesCache].sort(
+      (a, b) => parseFloat(a.price_php || 0) - parseFloat(b.price_php || 0)
+    );
 
-    affordableSummary.textContent = `Saving ${formatCurrency(monthlyAlloc)}/month (${savingsPct}% of ${formatCurrency(salary)})`;
+    const withinBudget = sortedByPrice
+      .filter((w) => parseFloat(w.price_php || 0) <= annualTargetBudget)
+      .reverse();
+
+    const aboveBudget = sortedByPrice.filter(
+      (w) => parseFloat(w.price_php || 0) > annualTargetBudget
+    );
+
+    const topFive = [...withinBudget, ...aboveBudget].slice(0, 5);
+
+    affordableSummary.textContent = `1-Yr Target Budget: ${formatCurrency(annualTargetBudget)} (${formatCurrency(monthlyAlloc)}/mo at ${savingsPct}%)`;
 
     topFive.forEach((watch, index) => {
       const price = parseFloat(watch.price_php || 0);
@@ -623,7 +662,7 @@ function initDashboardPage() {
     });
   }
 
-  /* Fetch All Watches */
+  /* Watch catalog and search */
   async function fetchAllWatches() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/watches`, {
@@ -640,7 +679,6 @@ function initDashboardPage() {
     }
   }
 
-  /* Search Watches */
   async function searchWatches(query) {
     try {
       const response = await fetch(
@@ -691,7 +729,7 @@ function initDashboardPage() {
     searchDropdown.classList.remove('hidden');
   }
 
-  /* Populate Watch Card */
+  /* Display selected watch */
   function displayWatch(watch) {
     selectedWatch = watch;
 
@@ -739,26 +777,27 @@ function initDashboardPage() {
     }
 
     updateFavoriteButtonState();
+    updatePinButtonState();
     calculateReality();
   }
 
-  /* Reality Check Calculation Engine */
+  /* Reality check calculation */
   function calculateReality() {
-    const salary = parseFloat(salaryInput.value);
+    const salary = getValidSalary();
     const savingsPct = parseInt(savingsSlider.value, 10);
     savingsDisplay.textContent = `${savingsPct}%`;
 
-    if (!selectedWatch || !salary || salary <= 0) {
+    if (!selectedWatch || !salary) {
       outYears.textContent = '--';
       outCutoffs.textContent = '--';
       outHours.textContent = '--';
-      verdictBadge.textContent = 'AWAITING INPUT';
+      verdictBadge.textContent = salaryInput.value.trim() !== '' ? 'MIN SALARY ₱1,000' : 'AWAITING INPUT';
       verdictBadge.classList.remove('verdict-alert');
       eqChicken.textContent = '--';
       eqCoffee.textContent = '--';
       eqIphones.textContent = '--';
       eqRent.textContent = '--';
-      humorQuote.textContent = '"Enter your salary above to calculate your reality."';
+      humorQuote.textContent = '"Enter a monthly salary of at least ₱1,000 to calculate your reality."';
       return;
     }
 
@@ -805,7 +844,7 @@ function initDashboardPage() {
     }
   }
 
-  /* Event Listeners */
+  /* Event listeners */
   navAuthBtn.addEventListener('click', () => {
     if (currentUser) {
       localStorage.removeItem(USER_STORAGE_KEY);
@@ -866,7 +905,7 @@ function initDashboardPage() {
     }
   });
 
-  /* Initial Load */
+  /* Initial load */
   (async () => {
     await syncUserSession();
     const watches = await fetchAllWatches();
@@ -876,7 +915,7 @@ function initDashboardPage() {
   })();
 }
 
-/* Boot Active Page */
+/* Boot active page */
 window.addEventListener('DOMContentLoaded', () => {
   initLoginPage();
   initDashboardPage();
