@@ -9,296 +9,238 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="app-body">
 
-  <!-- Top bar -->
-  <nav class="site-nav">
-    <div class="nav-inner">
-      <div class="brand">
-        <span class="brand-name">Broke O'Clock</span>
+  <!-- Sticky Top Navigation Bar -->
+  <header class="top-nav">
+    <div class="nav-container">
+      <div class="nav-left">
+        <a href="#top" class="brand-logo">Broke O'Clock</a>
+        <span class="sahod-pill">15/30 SAHOD CHECK</span>
       </div>
-      <div class="nav-actions">
-        <span class="nav-sahod-tag">15/30 SAHOD CHECK</span>
-        <span id="nav-user-badge" class="nav-user-badge hidden"></span>
-        <button type="button" id="nav-auth-btn" class="nav-auth-btn">Sign In</button>
+
+      <div class="nav-right">
+        <button type="button" id="nav-favorites-btn" class="nav-outline-btn hidden">
+          Favorites (<span id="favorites-count">0</span>)
+        </button>
+        <button type="button" id="nav-goals-btn" class="nav-outline-btn hidden">
+          Grail Goals (<span id="goals-count">0</span>)
+        </button>
+        <span id="nav-user-badge" class="nav-user-pill hidden"></span>
+        <button type="button" id="nav-auth-btn" class="nav-solid-btn">Sign In</button>
       </div>
     </div>
-  </nav>
+  </header>
 
-  <!-- Hero section -->
-  <section class="hero-screen">
-    <div class="hero-content">
-      <h1 class="hero-headline">
-        LOOK AT THE TIME.<br>
-        IT’S TIME TO BE REALISTIC.
+  <!-- Compact Editorial Hero Banner -->
+  <section id="top" class="hero-banner">
+    <div class="hero-container">
+      <h1 class="hero-title">
+        LOOK AT THE TIME. <span class="hero-accent">IT’S TIME TO BE REALISTIC.</span>
       </h1>
-      <p class="hero-quote">
-        "Your wrist deserves luxury. Your 13th month says Casio."
-      </p>
-      <a href="#dashboard" class="hero-cta">Calculate Your Reality ↓</a>
+      <div class="hero-side">
+        <p class="hero-sub">
+          Your wrist deserves luxury. Your 13th month says Casio.
+        </p>
+        <a href="#dashboard" class="hero-scroll-link">Calculate Your Reality ↓</a>
+      </div>
     </div>
-    <div class="hero-spacer"></div>
   </section>
 
-  <!-- Dashboard area -->
-  <section id="dashboard" class="dashboard-section">
-    <div class="dashboard-shell">
-      
-      <!-- Search bar, favorites, and goals -->
-      <div class="search-row">
-        <div class="search-wrap">
-          <input 
-            type="text" 
-            id="watch-search" 
-            placeholder="Search watch by brand, model, or nickname..." 
+  <!-- Main Calculator Workspace -->
+  <main id="dashboard" class="workspace">
+    <div class="workspace-container">
+
+      <!-- Full-Width Search Bar -->
+      <div class="search-box-wrap">
+        <div class="search-bar">
+          <input
+            type="text"
+            id="watch-search"
+            placeholder="Search watch by brand, model, or nickname..."
             autocomplete="off"
           />
-          <button id="search-btn" class="search-action-btn">Search</button>
-          <div id="search-dropdown" class="search-dropdown hidden"></div>
+          <button type="button" id="search-btn" class="search-submit-btn">Search</button>
         </div>
-
-        <div id="favorites-wrap" class="favorites-wrap hidden">
-          <button type="button" id="favorites-btn" class="favorites-btn">
-            Favorites (<span id="favorites-count">0</span>)
-          </button>
-          <div id="favorites-dropdown" class="search-dropdown favorites-dropdown hidden"></div>
-        </div>
-
-        <div id="goals-wrap" class="favorites-wrap hidden">
-          <button type="button" id="goals-btn" class="favorites-btn goals-nav-btn">
-            Grail Goals (<span id="goals-count">0</span>)
-          </button>
-        </div>
+        <div id="search-dropdown" class="search-results-list hidden"></div>
       </div>
 
-      <!-- Dashboard grid -->
-      <div class="dashboard-grid">
-        
-        <!-- Left Column: Watch card -->
-        <div class="card watch-card">
-          <!-- Spotlight top -->
-          <div class="watch-spotlight-top">
-            <div class="spotlight-meta">
-              <span id="watch-brand" class="spotlight-tag">WATCH BRAND</span>
-              <div class="spotlight-meta-right">
-                <span id="spec-year" class="spotlight-tag">YEAR</span>
-                <button type="button" id="favorite-toggle-btn" class="fav-toggle-btn" title="Add to favorites">+ Favorite</button>
-              </div>
-            </div>
+      <!-- Two-Column Main Grid: Watch Card + Financial Reality Audit -->
+      <div class="main-grid">
 
-            <div class="spotlight-body">
-              <div class="image-frame">
-                <img id="watch-img" src="" alt="Selected Watch" class="hidden" />
-                <div id="image-placeholder" class="img-empty">
-                  <span>Select a watch from search</span>
-                </div>
-              </div>
+        <!-- Left Card: Selected Watch & Specifications -->
+        <section class="brutal-card watch-panel">
+          <div class="watch-panel-head">
+            <span id="watch-brand-year" class="mono-meta">WATCH BRAND • YEAR</span>
+            <button type="button" id="favorite-toggle-btn" class="fav-btn">+ Favorite</button>
+          </div>
 
-              <div class="price-container">
-                <span class="price-label">MARKET VALUATION</span>
-                <span id="watch-price" class="price-number">₱0</span>
-                <span class="price-sub">estimated market price</span>
-              </div>
+          <div class="watch-visual-stage">
+            <img id="watch-img" src="" alt="Selected Watch" class="hidden" />
+            <div id="image-placeholder" class="watch-placeholder">
+              <span>Select a watch from search</span>
             </div>
           </div>
 
-          <!-- Specs bottom -->
-          <div class="watch-specs-bottom">
-            <div class="title-wrap">
-              <h2 id="watch-model" class="watch-title">Select a watch</h2>
-              <p id="watch-nickname" class="watch-nick"></p>
-            </div>
+          <div class="watch-valuation-block">
+            <span class="mono-micro">MARKET VALUATION</span>
+            <div id="watch-price" class="valuation-amount">₱0</div>
+            <h2 id="watch-model" class="watch-model-name">Select a watch</h2>
+            <p id="watch-nickname" class="watch-nick-tag"></p>
+          </div>
 
-            <div class="specs-row">
-              <div class="spec-tile">
-                <span class="tile-label">Case Size</span>
-                <span id="spec-case" class="tile-val">-- mm</span>
-              </div>
-              <div class="spec-tile">
-                <span class="tile-label">Movement</span>
-                <span id="spec-movement" class="tile-val">--</span>
-              </div>
-              <div class="spec-tile">
-                <span class="tile-label">Type</span>
-                <span id="spec-category" class="tile-val">--</span>
-              </div>
-              <div class="spec-tile">
-                <span class="tile-label">Made In</span>
-                <span id="spec-origin" class="tile-val">--</span>
-              </div>
-              <div class="spec-tile">
-                <span class="tile-label">Reference</span>
-                <span id="spec-ref" class="tile-val">--</span>
-              </div>
-              <div class="spec-tile">
-                <span class="tile-label">Power Reserve</span>
-                <span id="spec-reserve" class="tile-val">--</span>
-              </div>
+          <div class="specs-table">
+            <div class="spec-cell">
+              <span class="spec-lbl">CASE SIZE</span>
+              <span id="spec-case" class="spec-val">-- mm</span>
+            </div>
+            <div class="spec-cell">
+              <span class="spec-lbl">MOVEMENT</span>
+              <span id="spec-movement" class="spec-val">--</span>
+            </div>
+            <div class="spec-cell">
+              <span class="spec-lbl">TYPE</span>
+              <span id="spec-category" class="spec-val">--</span>
+            </div>
+            <div class="spec-cell">
+              <span class="spec-lbl">MADE IN</span>
+              <span id="spec-origin" class="spec-val">--</span>
+            </div>
+            <div class="spec-cell">
+              <span class="spec-lbl">REFERENCE</span>
+              <span id="spec-ref" class="spec-val">--</span>
+            </div>
+            <div class="spec-cell">
+              <span class="spec-lbl">POWER RESERVE</span>
+              <span id="spec-reserve" class="spec-val">--</span>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Right Column: Separated Cards -->
-        <div class="right-col">
-          
-          <!-- Top Card: Financial Reality Audit -->
-          <div class="card calc-card">
-            <div class="card-tag-row">
-              <span class="tag-brand">FINANCIAL REALITY AUDIT</span>
-              <div class="calc-tag-actions">
-                <button type="button" id="affordable-btn" class="affordable-btn" title="See top 5 closest watches">Closest Picks</button>
-                <button type="button" id="pin-goal-btn" class="pin-goal-btn" title="Pin current calculation as a goal">+ Pin Goal</button>
-                <span id="verdict-badge" class="tag-status">Awaiting Input</span>
+        <!-- Right Card: Financial Reality Audit -->
+        <section class="brutal-card audit-panel">
+          <div class="audit-top">
+            <span class="mono-meta">FINANCIAL REALITY AUDIT</span>
+
+            <div class="field-group">
+              <label for="monthly-salary" class="mono-micro">MONTHLY SALARY (PHP)</label>
+              <div class="salary-input-row">
+                <span class="php-prefix">₱</span>
+                <input type="number" id="monthly-salary" placeholder="45,000" min="1" />
               </div>
             </div>
 
-            <div class="inputs-stack">
-              <div class="input-item">
-                <label for="monthly-salary">Your Monthly Salary (PHP)</label>
-                <div class="input-box">
-                  <span class="currency-sym">₱</span>
-                  <input type="number" id="monthly-salary" placeholder="30,000" min="1" />
-                </div>
+            <div class="field-group">
+              <div class="slider-header">
+                <label for="savings-rate" class="mono-micro">WATCH SAVINGS CUT</label>
+                <span id="savings-display" class="slider-readout">20%</span>
               </div>
-
-              <div class="input-item">
-                <div class="slider-info">
-                  <label for="savings-rate">Watch Savings Cut</label>
-                  <span id="savings-display" class="slider-pct">20%</span>
-                </div>
-                <input type="range" id="savings-rate" min="5" max="100" value="20" step="5" />
-                <div class="slider-steps">
-                  <span>5% (Easy)</span>
-                  <span>35% (Normal)</span>
-                  <span>65% (Hard)</span>
-                  <span>100% (No Food)</span>
-                </div>
+              <input type="range" id="savings-rate" min="5" max="100" value="20" step="5" />
+              <div class="slider-bounds">
+                <span>5%</span>
+                <span>100%</span>
               </div>
             </div>
 
-            <div class="stats-banner">
-              <div class="stat-unit">
-                <span id="out-years" class="stat-val">--</span>
-                <span class="stat-lbl">Years of Work</span>
-              </div>
-              <div class="stat-unit">
-                <span id="out-cutoffs" class="stat-val">--</span>
-                <span class="stat-lbl">Paydays Needed</span>
-              </div>
-              <div class="stat-unit">
-                <span id="out-hours" class="stat-val">--</span>
-                <span class="stat-lbl">Work Hours</span>
-              </div>
+            <div id="verdict-badge" class="verdict-banner">AWAITING INPUT</div>
+
+            <div class="audit-actions-row">
+              <button type="button" id="affordable-btn" class="action-outline-btn">Closest Picks</button>
+              <button type="button" id="pin-goal-btn" class="action-solid-btn">+ Pin Goal</button>
             </div>
           </div>
 
-          <!-- Bottom Card: Trade-Off Statement -->
-          <div class="card tradeoffs-card">
-            <div class="card-tag-row">
-              <span class="tag-brand">TRADE-OFF STATEMENT</span>
-              <span id="tradeoff-equiv-tag" class="tag-sub">Equivalent in Market Value</span>
+          <div class="audit-stats-grid">
+            <div class="audit-stat-box">
+              <span class="stat-top-lbl">YEARS OF WORK</span>
+              <span id="out-years" class="stat-big-num">--</span>
             </div>
-
-            <div class="tradeoffs-box">
-              <span class="tradeoffs-head">Or you could buy instead:</span>
-              <ul id="equivalents-items" class="tradeoffs-list">
-                <li>Enter your salary above to view trade-offs.</li>
-              </ul>
+            <div class="audit-stat-box">
+              <span class="stat-top-lbl">PAYDAYS NEEDED</span>
+              <span id="out-cutoffs" class="stat-big-num">--</span>
             </div>
-
-            <div class="card-foot">
-              <p id="humor-quote" class="foot-quote">"Start grinding."</p>
+            <div class="audit-stat-box">
+              <span class="stat-top-lbl">WORK HOURS</span>
+              <span id="out-hours" class="stat-big-num">--</span>
             </div>
           </div>
-
-        </div>
+        </section>
 
       </div>
+
+      <!-- Full-Width Bottom Card: Trade-Offs -->
+      <section class="brutal-card tradeoffs-panel">
+        <div class="tradeoffs-head-row">
+          <span class="mono-meta">TRADE-OFFS</span>
+        </div>
+
+        <div id="equivalents-grid" class="tradeoffs-grid">
+          <div class="tradeoff-cell">
+            <span id="eq-chicken" class="tradeoff-num">--</span>
+            <span class="tradeoff-desc">2-pc Chickenjoy meals</span>
+          </div>
+          <div class="tradeoff-cell">
+            <span id="eq-coffee" class="tradeoff-num">--</span>
+            <span class="tradeoff-desc">Spanish Lattes</span>
+          </div>
+          <div class="tradeoff-cell">
+            <span id="eq-iphones" class="tradeoff-num">--</span>
+            <span class="tradeoff-desc">Flagship iPhones</span>
+          </div>
+          <div class="tradeoff-cell">
+            <span id="eq-rent" class="tradeoff-num">--</span>
+            <span class="tradeoff-desc">Months of Metro studio rent</span>
+          </div>
+        </div>
+
+        <div class="tradeoffs-quote-bar">
+          <p id="humor-quote">"Enter your salary above to calculate your reality."</p>
+        </div>
+      </section>
+
     </div>
-  </section>
+  </main>
 
-  <!-- Auth Modal -->
-  <div id="auth-modal" class="modal-backdrop hidden">
-    <div class="modal-card">
-      <div class="modal-head">
-        <div>
-          <span class="modal-tag">ACCOUNT ACCESS</span>
-          <h2 id="auth-modal-title" class="modal-title">Sign In</h2>
-        </div>
-        <button type="button" id="auth-close-btn" class="modal-close-btn" aria-label="Close modal">✕</button>
+  <!-- Slide-Over Drawer: Favorites & Grail Goals (Frame 3) -->
+  <div id="ledger-backdrop" class="overlay-backdrop hidden">
+    <aside class="ledger-drawer" aria-label="Favorites and Grail Goals">
+      <div class="drawer-top-bar">
+        <h2 class="drawer-heading">FAVORITES (<span id="drawer-fav-count">0</span>)</h2>
+        <button type="button" id="ledger-close-btn" class="square-close-btn" aria-label="Close drawer">×</button>
       </div>
 
-      <div class="modal-body">
-        <p id="auth-modal-subtitle" class="modal-subtitle">
-          Sign in to sync your favorite watches and grail goals.
-        </p>
+      <div class="drawer-scroll-area">
+        <!-- Favorites Section -->
+        <div id="drawer-favorites-section" class="drawer-section">
+          <div id="favorites-list" class="favorites-ledger-list"></div>
+        </div>
 
-        <form id="auth-form" class="modal-form">
-          <div class="input-item">
-            <label for="auth-username">Username</label>
-            <div class="input-box modal-input-box">
-              <input type="text" id="auth-username" placeholder="Enter your username" required minlength="3" maxlength="50" />
-            </div>
+        <!-- Grail Goals Section -->
+        <div id="drawer-goals-section" class="drawer-section">
+          <div class="goals-section-header">
+            <h3 class="drawer-subheading">MY GRAIL GOALS</h3>
+            <span class="sahod-pill">15/30 SAHOD LEDGER</span>
           </div>
-
-          <div class="input-item">
-            <label for="auth-password">Password</label>
-            <div class="input-box modal-input-box">
-              <input type="password" id="auth-password" placeholder="Enter your password" required minlength="4" maxlength="72" />
-            </div>
-          </div>
-
-          <p id="auth-message" class="auth-message"></p>
-
-          <button type="submit" id="auth-submit-btn" class="modal-submit-btn">SIGN IN</button>
-        </form>
-
-        <div class="modal-switch">
-          <span id="auth-switch-prompt">Don't have an account?</span>
-          <button type="button" id="auth-switch-btn" class="modal-link-btn">Create Account</button>
+          <p id="goals-status-msg" class="drawer-helper-text"></p>
+          <div id="goals-list" class="goals-ledger-list"></div>
         </div>
       </div>
-    </div>
+    </aside>
   </div>
 
-  <!-- Grail Goals Modal -->
-  <div id="goals-modal" class="modal-backdrop hidden">
-    <div class="modal-card goals-modal-card">
-      <div class="modal-head">
-        <div>
-          <span class="modal-tag">15/30 SAHOD LEDGER</span>
-          <h2 class="modal-title">My Grail Goals</h2>
+  <!-- Centered Modal: Top 5 Closest Watches (Frame 4) -->
+  <div id="affordable-backdrop" class="overlay-backdrop centered-overlay hidden">
+    <div class="brutal-modal">
+      <div class="modal-header-block">
+        <div class="modal-title-side">
+          <span class="sahod-pill">REALISTIC TARGETS</span>
+          <h2 class="modal-big-title">TOP 5 CLOSEST WATCHES</h2>
+          <p id="affordable-summary" class="modal-sub-mono">Enter your salary to see your fastest targets.</p>
         </div>
-        <button type="button" id="goals-close-btn" class="modal-close-btn" aria-label="Close goals modal">✕</button>
+        <button type="button" id="affordable-close-btn" class="square-close-btn" aria-label="Close modal">×</button>
       </div>
 
-      <div class="modal-body goals-modal-body">
-        <p id="goals-status-msg" class="modal-subtitle">
-          Track your pinned watch budgets and log every 15/30 payday cutoff.
-        </p>
-        <div id="goals-list" class="goals-list"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Top 5 Closest Watches Modal -->
-  <div id="affordable-modal" class="modal-backdrop hidden">
-    <div class="modal-card goals-modal-card">
-      <div class="modal-head">
-        <div>
-          <span class="modal-tag">REALISTIC TARGETS</span>
-          <h2 class="modal-title">Top 5 Closest Watches</h2>
-        </div>
-        <button type="button" id="affordable-close-btn" class="modal-close-btn" aria-label="Close closest watches modal">✕</button>
-      </div>
-
-      <div class="modal-body goals-modal-body">
-        <p id="affordable-summary" class="modal-subtitle">
-          Enter your monthly salary to see the top 5 fastest watches to reach.
-        </p>
-
-        <div id="affordable-list" class="goals-list"></div>
-      </div>
+      <div id="affordable-list" class="closest-table-list"></div>
     </div>
   </div>
 

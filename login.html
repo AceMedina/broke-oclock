@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Broke O'Clock — Sign In</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="login-body">
+
+  <main class="login-split">
+    <!-- Left Column: Brand & Pitch -->
+    <section class="login-left">
+      <div class="login-brand-row">
+        <span class="login-brand-name">Broke O'Clock</span>
+        <span class="sahod-pill">15/30 SAHOD CHECK</span>
+      </div>
+
+      <div class="login-hero-block">
+        <h1 class="login-headline">
+          LOOK AT THE TIME. <span class="headline-accent">IT’S TIME TO BE REALISTIC.</span>
+        </h1>
+        <p class="login-quote">
+          Your wrist deserves luxury. Your 13th month says Casio.
+        </p>
+      </div>
+
+      <div class="login-guest-row">
+        <a href="index.html" id="guest-continue-link" class="guest-link">Continue as Guest →</a>
+      </div>
+    </section>
+
+    <!-- Right Column: Auth Card -->
+    <section class="login-right">
+      <div class="auth-box">
+        <div class="auth-tabs" role="tablist">
+          <button type="button" id="tab-signin" class="auth-tab active" aria-selected="true">Sign In</button>
+          <button type="button" id="tab-register" class="auth-tab" aria-selected="false">Create Account</button>
+        </div>
+
+        <form id="auth-form" class="auth-form">
+          <div class="auth-field">
+            <label for="auth-username">USERNAME</label>
+            <input
+              type="text"
+              id="auth-username"
+              placeholder="juan.dc"
+              required
+              minlength="3"
+              maxlength="50"
+              autocomplete="username"
+            />
+          </div>
+
+          <div class="auth-field">
+            <label for="auth-password">PASSWORD</label>
+            <input
+              type="password"
+              id="auth-password"
+              placeholder="••••••••"
+              required
+              minlength="4"
+              maxlength="72"
+              autocomplete="current-password"
+            />
+          </div>
+
+          <div id="auth-message" class="auth-alert hidden" role="alert"></div>
+
+          <button type="submit" id="auth-submit-btn" class="auth-submit">SIGN IN</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

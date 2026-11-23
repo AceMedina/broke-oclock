@@ -3,79 +3,7 @@ const API_BASE_URL = 'https://watch-api-eight.vercel.app';
 const API_KEY = 'broke-oclock-003';
 const USER_STORAGE_KEY = 'watch_user';
 
-/* DOM Elements - Navigation and Auth */
-const navUserBadge = document.getElementById('nav-user-badge');
-const navAuthBtn = document.getElementById('nav-auth-btn');
-const authModal = document.getElementById('auth-modal');
-const authCloseBtn = document.getElementById('auth-close-btn');
-const authForm = document.getElementById('auth-form');
-const authModalTitle = document.getElementById('auth-modal-title');
-const authModalSubtitle = document.getElementById('auth-modal-subtitle');
-const authSubmitBtn = document.getElementById('auth-submit-btn');
-const authSwitchPrompt = document.getElementById('auth-switch-prompt');
-const authSwitchBtn = document.getElementById('auth-switch-btn');
-const authMessage = document.getElementById('auth-message');
-
-/* DOM Elements - Search, Favorites, Goals, and Closest Watches */
-const searchInput = document.getElementById('watch-search');
-const searchBtn = document.getElementById('search-btn');
-const searchDropdown = document.getElementById('search-dropdown');
-const favoritesWrap = document.getElementById('favorites-wrap');
-const favoritesBtn = document.getElementById('favorites-btn');
-const favoritesCount = document.getElementById('favorites-count');
-const favoritesDropdown = document.getElementById('favorites-dropdown');
-const favoriteToggleBtn = document.getElementById('favorite-toggle-btn');
-const goalsWrap = document.getElementById('goals-wrap');
-const goalsBtn = document.getElementById('goals-btn');
-const goalsCount = document.getElementById('goals-count');
-const pinGoalBtn = document.getElementById('pin-goal-btn');
-const goalsModal = document.getElementById('goals-modal');
-const goalsCloseBtn = document.getElementById('goals-close-btn');
-const goalsStatusMsg = document.getElementById('goals-status-msg');
-const goalsList = document.getElementById('goals-list');
-const affordableBtn = document.getElementById('affordable-btn');
-const affordableModal = document.getElementById('affordable-modal');
-const affordableCloseBtn = document.getElementById('affordable-close-btn');
-const affordableSummary = document.getElementById('affordable-summary');
-const affordableList = document.getElementById('affordable-list');
-
-/* DOM Elements - Watch Card */
-const watchBrand = document.getElementById('watch-brand');
-const specYear = document.getElementById('spec-year');
-const watchImg = document.getElementById('watch-img');
-const imagePlaceholder = document.getElementById('image-placeholder');
-const watchModel = document.getElementById('watch-model');
-const watchNickname = document.getElementById('watch-nickname');
-const watchPrice = document.getElementById('watch-price');
-
-/* DOM Elements - 6 Spec Tiles */
-const specCase = document.getElementById('spec-case');
-const specMovement = document.getElementById('spec-movement');
-const specCategory = document.getElementById('spec-category');
-const specOrigin = document.getElementById('spec-origin');
-const specRef = document.getElementById('spec-ref');
-const specReserve = document.getElementById('spec-reserve');
-
-/* DOM Elements - Calculator */
-const salaryInput = document.getElementById('monthly-salary');
-const savingsSlider = document.getElementById('savings-rate');
-const savingsDisplay = document.getElementById('savings-display');
-const verdictBadge = document.getElementById('verdict-badge');
-const outYears = document.getElementById('out-years');
-const outCutoffs = document.getElementById('out-cutoffs');
-const outHours = document.getElementById('out-hours');
-const equivalentsList = document.getElementById('equivalents-items');
-const humorQuote = document.getElementById('humor-quote');
-
-/* State */
-let selectedWatch = null;
-let allWatchesCache = [];
-let currentUser = null;
-let userFavorites = [];
-let userGoals = [];
-let isRegisterMode = false;
-
-/* Request headers helper */
+/* Shared Helpers */
 function getApiHeaders() {
   return {
     'x-api-key': API_KEY,
@@ -83,7 +11,6 @@ function getApiHeaders() {
   };
 }
 
-/* Currency helper */
 function formatCurrency(amount) {
   return new Intl.NumberFormat('en-PH', {
     style: 'currency',
@@ -92,7 +19,6 @@ function formatCurrency(amount) {
   }).format(amount);
 }
 
-/* Read logged-in user from localStorage */
 function loadSavedUser() {
   try {
     const raw = localStorage.getItem(USER_STORAGE_KEY);
@@ -107,776 +33,851 @@ function loadSavedUser() {
   }
 }
 
-/* Update navbar, favorites, and goals UI for current user */
-async function syncUserSession() {
-  currentUser = loadSavedUser();
+/* =========================================================
+   PAGE 1: STANDALONE LOGIN / REGISTER FLOW (login.html)
+   ========================================================= */
+function initLoginPage() {
+  const authForm = document.getElementById('auth-form');
+  if (!authForm) return;
 
-  if (currentUser) {
-    navUserBadge.textContent = `@${currentUser.username}`;
-    navUserBadge.classList.remove('hidden');
-    navAuthBtn.textContent = 'Sign Out';
-    favoritesWrap.classList.remove('hidden');
-    goalsWrap.classList.remove('hidden');
-    await Promise.all([fetchUserFavorites(), fetchUserGoals()]);
-  } else {
-    userFavorites = [];
-    userGoals = [];
-    navUserBadge.textContent = '';
-    navUserBadge.classList.add('hidden');
-    navAuthBtn.textContent = 'Sign In';
-    favoritesWrap.classList.add('hidden');
-    favoritesDropdown.classList.add('hidden');
-    goalsWrap.classList.add('hidden');
-    goalsModal.classList.add('hidden');
+  const tabSignIn = document.getElementById('tab-signin');
+  const tabRegister = document.getElementById('tab-register');
+  const authSubmitBtn = document.getElementById('auth-submit-btn');
+  const authMessage = document.getElementById('auth-message');
+  const usernameInput = document.getElementById('auth-username');
+  const passwordInput = document.getElementById('auth-password');
+
+  let isRegisterMode = false;
+
+  function setAuthMode(registerMode) {
+    isRegisterMode = registerMode;
+    authMessage.classList.add('hidden');
+    authMessage.classList.remove('success');
+    authMessage.textContent = '';
+
+    if (isRegisterMode) {
+      tabRegister.classList.add('active');
+      tabRegister.setAttribute('aria-selected', 'true');
+      tabSignIn.classList.remove('active');
+      tabSignIn.setAttribute('aria-selected', 'false');
+      authSubmitBtn.textContent = 'CREATE ACCOUNT';
+      passwordInput.setAttribute('autocomplete', 'new-password');
+    } else {
+      tabSignIn.classList.add('active');
+      tabSignIn.setAttribute('aria-selected', 'true');
+      tabRegister.classList.remove('active');
+      tabRegister.setAttribute('aria-selected', 'false');
+      authSubmitBtn.textContent = 'SIGN IN';
+      passwordInput.setAttribute('autocomplete', 'current-password');
+    }
   }
 
-  updateFavoriteToggleState();
-}
+  tabSignIn.addEventListener('click', () => setAuthMode(false));
+  tabRegister.addEventListener('click', () => setAuthMode(true));
 
-/* Open and close auth modal */
-function openAuthModal() {
-  isRegisterMode = false;
-  authForm.reset();
-  authMessage.textContent = '';
-  authMessage.className = 'auth-message';
-  authModalTitle.textContent = 'Sign In';
-  authModalSubtitle.textContent = 'Sign in to sync your favorite watches and grail goals.';
-  authSubmitBtn.textContent = 'SIGN IN';
-  authSwitchPrompt.textContent = "Don't have an account?";
-  authSwitchBtn.textContent = 'Create Account';
-  authModal.classList.remove('hidden');
-}
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-function closeAuthModal() {
-  authModal.classList.add('hidden');
-}
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
 
-/* Fetch user favorites */
-async function fetchUserFavorites() {
-  if (!currentUser || !currentUser.id) return;
+    authSubmitBtn.disabled = true;
+    authSubmitBtn.textContent = 'PLEASE WAIT...';
+    authMessage.classList.add('hidden');
+    authMessage.classList.remove('success');
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/users/${currentUser.id}/favorites`, {
-      method: 'GET',
-      headers: getApiHeaders()
-    });
+    const endpoint = isRegisterMode ? '/api/v1/auth/register' : '/api/v1/auth/login';
 
-    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-    const data = await response.json();
-    userFavorites = data.favorites || [];
-    favoritesCount.textContent = userFavorites.length;
-    renderFavoritesDropdown();
-    updateFavoriteToggleState();
-  } catch (error) {
-    console.error('Failed to fetch favorites:', error);
-  }
-}
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'POST',
+        headers: getApiHeaders(),
+        body: JSON.stringify({ username, password })
+      });
 
-/* Render user favorites dropdown */
-function renderFavoritesDropdown() {
-  favoritesDropdown.innerHTML = '';
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || 'Incorrect username or password.');
+      }
 
-  if (userFavorites.length === 0) {
-    const emptyRow = document.createElement('div');
-    emptyRow.className = 'search-item';
-    emptyRow.textContent = 'No favorite watches yet';
-    favoritesDropdown.appendChild(emptyRow);
-    return;
-  }
-
-  userFavorites.forEach((watch) => {
-    const row = document.createElement('div');
-    row.className = 'search-item';
-    row.innerHTML = `
-      <span>${watch.model}</span>
-      <span class="search-item-brand">${formatCurrency(watch.price_php || 0)}</span>
-    `;
-
-    row.addEventListener('click', () => {
-      displayWatch(watch);
-      favoritesDropdown.classList.add('hidden');
-    });
-
-    favoritesDropdown.appendChild(row);
+      if (isRegisterMode) {
+        setAuthMode(false);
+        passwordInput.value = '';
+        authMessage.textContent = 'Account created. Sign in to continue.';
+        authMessage.classList.add('success');
+        authMessage.classList.remove('hidden');
+      } else {
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
+        window.location.href = 'index.html';
+      }
+    } catch (error) {
+      authMessage.textContent = error.message;
+      authMessage.classList.remove('hidden');
+      authSubmitBtn.textContent = isRegisterMode ? 'CREATE ACCOUNT' : 'SIGN IN';
+    } finally {
+      authSubmitBtn.disabled = false;
+    }
   });
 }
 
-/* Update Favorite button on watch card */
-function updateFavoriteToggleState() {
-  if (!selectedWatch || !selectedWatch.id) {
-    favoriteToggleBtn.textContent = '+ Favorite';
-    favoriteToggleBtn.classList.remove('is-saved');
-    return;
+/* =========================================================
+   PAGE 2: MAIN CALCULATOR WORKSPACE (index.html)
+   ========================================================= */
+function initDashboardPage() {
+  const watchSearch = document.getElementById('watch-search');
+  if (!watchSearch) return;
+
+  /* Navbar Elements */
+  const navFavoritesBtn = document.getElementById('nav-favorites-btn');
+  const navGoalsBtn = document.getElementById('nav-goals-btn');
+  const favoritesCount = document.getElementById('favorites-count');
+  const goalsCount = document.getElementById('goals-count');
+  const navUserBadge = document.getElementById('nav-user-badge');
+  const navAuthBtn = document.getElementById('nav-auth-btn');
+
+  /* Search Elements */
+  const searchBtn = document.getElementById('search-btn');
+  const searchDropdown = document.getElementById('search-dropdown');
+
+  /* Watch Card Elements */
+  const watchBrandYear = document.getElementById('watch-brand-year');
+  const favoriteToggleBtn = document.getElementById('favorite-toggle-btn');
+  const watchImg = document.getElementById('watch-img');
+  const imagePlaceholder = document.getElementById('image-placeholder');
+  const watchPrice = document.getElementById('watch-price');
+  const watchModel = document.getElementById('watch-model');
+  const watchNickname = document.getElementById('watch-nickname');
+  const specCase = document.getElementById('spec-case');
+  const specMovement = document.getElementById('spec-movement');
+  const specCategory = document.getElementById('spec-category');
+  const specOrigin = document.getElementById('spec-origin');
+  const specRef = document.getElementById('spec-ref');
+  const specReserve = document.getElementById('spec-reserve');
+
+  /* Reality Audit Elements */
+  const salaryInput = document.getElementById('monthly-salary');
+  const savingsSlider = document.getElementById('savings-rate');
+  const savingsDisplay = document.getElementById('savings-display');
+  const verdictBadge = document.getElementById('verdict-badge');
+  const affordableBtn = document.getElementById('affordable-btn');
+  const pinGoalBtn = document.getElementById('pin-goal-btn');
+  const outYears = document.getElementById('out-years');
+  const outCutoffs = document.getElementById('out-cutoffs');
+  const outHours = document.getElementById('out-hours');
+
+  /* Trade-Offs Elements */
+  const eqChicken = document.getElementById('eq-chicken');
+  const eqCoffee = document.getElementById('eq-coffee');
+  const eqIphones = document.getElementById('eq-iphones');
+  const eqRent = document.getElementById('eq-rent');
+  const humorQuote = document.getElementById('humor-quote');
+
+  /* Slide-Over Ledger Drawer Elements */
+  const ledgerBackdrop = document.getElementById('ledger-backdrop');
+  const ledgerCloseBtn = document.getElementById('ledger-close-btn');
+  const drawerFavCount = document.getElementById('drawer-fav-count');
+  const drawerFavoritesSection = document.getElementById('drawer-favorites-section');
+  const drawerGoalsSection = document.getElementById('drawer-goals-section');
+  const favoritesList = document.getElementById('favorites-list');
+  const goalsStatusMsg = document.getElementById('goals-status-msg');
+  const goalsList = document.getElementById('goals-list');
+
+  /* Top 5 Closest Modal Elements */
+  const affordableBackdrop = document.getElementById('affordable-backdrop');
+  const affordableCloseBtn = document.getElementById('affordable-close-btn');
+  const affordableSummary = document.getElementById('affordable-summary');
+  const affordableList = document.getElementById('affordable-list');
+
+  /* State */
+  let currentUser = null;
+  let selectedWatch = null;
+  let allWatchesCache = [];
+  let userFavorites = [];
+  let userGoals = [];
+
+  /* Sync Auth State in Navbar */
+  async function syncUserSession() {
+    currentUser = loadSavedUser();
+
+    if (currentUser) {
+      navFavoritesBtn.classList.remove('hidden');
+      navGoalsBtn.classList.remove('hidden');
+      navUserBadge.textContent = `@${currentUser.username}`;
+      navUserBadge.classList.remove('hidden');
+      navAuthBtn.textContent = 'Sign Out';
+      await Promise.all([fetchUserFavorites(), fetchUserGoals()]);
+    } else {
+      userFavorites = [];
+      userGoals = [];
+      navFavoritesBtn.classList.add('hidden');
+      navGoalsBtn.classList.add('hidden');
+      navUserBadge.textContent = '';
+      navUserBadge.classList.add('hidden');
+      navAuthBtn.textContent = 'Sign In';
+      ledgerBackdrop.classList.add('hidden');
+    }
+
+    updateFavoriteButtonState();
   }
 
-  const isSaved = userFavorites.some((item) => item.id === selectedWatch.id);
-  if (isSaved) {
-    favoriteToggleBtn.textContent = 'Favorited ★';
-    favoriteToggleBtn.classList.add('is-saved');
-  } else {
-    favoriteToggleBtn.textContent = '+ Favorite';
-    favoriteToggleBtn.classList.remove('is-saved');
-  }
-}
-
-/* Add or remove selected watch from favorites */
-async function toggleSelectedWatchFavorite() {
-  if (!selectedWatch || !selectedWatch.id) return;
-
-  if (!currentUser || !currentUser.id) {
-    openAuthModal();
-    return;
+  /* Open & Close Slide-Over Ledger Drawer */
+  function openLedgerDrawer(focusSection) {
+    if (!currentUser || !currentUser.id) {
+      window.location.href = 'login.html';
+      return;
+    }
+    ledgerBackdrop.classList.remove('hidden');
+    const target = focusSection === 'goals' ? drawerGoalsSection : drawerFavoritesSection;
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
-  const isSaved = userFavorites.some((item) => item.id === selectedWatch.id);
-  favoriteToggleBtn.disabled = true;
+  function closeLedgerDrawer() {
+    ledgerBackdrop.classList.add('hidden');
+  }
 
-  try {
-    if (isSaved) {
+  /* Fetch & Render Favorites */
+  async function fetchUserFavorites() {
+    if (!currentUser || !currentUser.id) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/users/${currentUser.id}/favorites`, {
+        method: 'GET',
+        headers: getApiHeaders()
+      });
+      if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+      const data = await response.json();
+      userFavorites = data.favorites || [];
+      favoritesCount.textContent = userFavorites.length;
+      drawerFavCount.textContent = userFavorites.length;
+      renderFavoritesLedger();
+      updateFavoriteButtonState();
+    } catch (error) {
+      console.error('Failed to fetch favorites:', error);
+    }
+  }
+
+  function renderFavoritesLedger() {
+    favoritesList.innerHTML = '';
+
+    if (userFavorites.length === 0) {
+      const emptyMsg = document.createElement('p');
+      emptyMsg.className = 'drawer-helper-text';
+      emptyMsg.style.padding = '12px 0';
+      emptyMsg.textContent = 'No favorite watches saved yet.';
+      favoritesList.appendChild(emptyMsg);
+      return;
+    }
+
+    userFavorites.forEach((watch) => {
+      const row = document.createElement('div');
+      row.className = 'fav-ledger-row';
+      row.innerHTML = `
+        <div class="fav-ledger-info">
+          <span class="fav-ledger-title">${watch.brand} ${watch.model}</span>
+          <span class="fav-ledger-price">${formatCurrency(watch.price_php || 0)}</span>
+        </div>
+        <div class="fav-ledger-btns">
+          <button type="button" class="mini-brutal-btn fav-load-btn">Load</button>
+          <button type="button" class="mini-remove-btn fav-del-btn" aria-label="Remove favorite">×</button>
+        </div>
+      `;
+
+      row.querySelector('.fav-load-btn').addEventListener('click', () => {
+        displayWatch(watch);
+        closeLedgerDrawer();
+      });
+
+      row.querySelector('.fav-del-btn').addEventListener('click', async () => {
+        await removeFavoriteById(watch.id);
+      });
+
+      favoritesList.appendChild(row);
+    });
+  }
+
+  async function removeFavoriteById(watchId) {
+    if (!currentUser || !currentUser.id) return;
+    try {
       const response = await fetch(
-        `${API_BASE_URL}/api/v1/favorites/${currentUser.id}/${selectedWatch.id}`,
+        `${API_BASE_URL}/api/v1/favorites/${currentUser.id}/${watchId}`,
         {
           method: 'DELETE',
           headers: getApiHeaders()
         }
       );
       if (!response.ok) throw new Error('Failed to remove favorite.');
+      await fetchUserFavorites();
+    } catch (error) {
+      console.error('Remove favorite error:', error);
+    }
+  }
+
+  function updateFavoriteButtonState() {
+    if (!selectedWatch || !selectedWatch.id) {
+      favoriteToggleBtn.textContent = '+ Favorite';
+      favoriteToggleBtn.classList.remove('is-saved');
+      return;
+    }
+
+    const isSaved = userFavorites.some((item) => item.id === selectedWatch.id);
+    if (isSaved) {
+      favoriteToggleBtn.textContent = 'Favorited ★';
+      favoriteToggleBtn.classList.add('is-saved');
     } else {
-      const response = await fetch(`${API_BASE_URL}/api/v1/favorites`, {
+      favoriteToggleBtn.textContent = '+ Favorite';
+      favoriteToggleBtn.classList.remove('is-saved');
+    }
+  }
+
+  async function toggleSelectedWatchFavorite() {
+    if (!selectedWatch || !selectedWatch.id) return;
+
+    if (!currentUser || !currentUser.id) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const isSaved = userFavorites.some((item) => item.id === selectedWatch.id);
+    favoriteToggleBtn.disabled = true;
+
+    try {
+      if (isSaved) {
+        await removeFavoriteById(selectedWatch.id);
+      } else {
+        const response = await fetch(`${API_BASE_URL}/api/v1/favorites`, {
+          method: 'POST',
+          headers: getApiHeaders(),
+          body: JSON.stringify({
+            user_id: currentUser.id,
+            watch_id: selectedWatch.id
+          })
+        });
+        if (!response.ok) throw new Error('Failed to add favorite.');
+        await fetchUserFavorites();
+      }
+    } catch (error) {
+      console.error('Favorite toggle error:', error);
+    } finally {
+      favoriteToggleBtn.disabled = false;
+    }
+  }
+
+  /* Fetch & Render Grail Goals */
+  async function fetchUserGoals() {
+    if (!currentUser || !currentUser.id) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/broke-oclock/users/${currentUser.id}/goals`, {
+        method: 'GET',
+        headers: getApiHeaders()
+      });
+      if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+      const data = await response.json();
+      userGoals = data.goals || [];
+      goalsCount.textContent = userGoals.length;
+      renderGoalsLedger();
+    } catch (error) {
+      console.error('Failed to fetch goals:', error);
+    }
+  }
+
+  function getEstimatedTargetDate(monthsRemaining) {
+    if (monthsRemaining <= 0) return 'Goal Reached';
+    const target = new Date();
+    target.setMonth(target.getMonth() + Math.ceil(monthsRemaining));
+    return target.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  }
+
+  function renderGoalsLedger() {
+    goalsList.innerHTML = '';
+
+    if (userGoals.length === 0) {
+      goalsStatusMsg.textContent = 'No pinned grail goals yet. Enter your salary on the dashboard and click "+ Pin Goal".';
+      return;
+    }
+
+    goalsStatusMsg.textContent = 'Log every 15/30 sahod cutoff deposit toward your wrist goal.';
+
+    userGoals.forEach((goal) => {
+      const price = parseFloat(goal.price_php || 0);
+      const saved = parseFloat(goal.amount_saved || 0);
+      const salary = parseFloat(goal.monthly_salary || 0);
+      const rate = parseInt(goal.savings_rate || 20, 10);
+      const monthlyAlloc = salary * (rate / 100);
+      const cutoffAmt = monthlyAlloc / 2;
+      const remaining = Math.max(0, price - saved);
+      const monthsLeft = monthlyAlloc > 0 ? remaining / monthlyAlloc : 0;
+      const pct = price > 0 ? Math.min(100, (saved / price) * 100) : 0;
+
+      const card = document.createElement('div');
+      card.className = 'goal-brutal-card';
+      card.innerHTML = `
+        <div class="goal-card-top">
+          <span class="goal-card-title">${goal.brand} ${goal.model}</span>
+          <span class="goal-verdict-tag">${goal.verdict || 'GOAL'}</span>
+        </div>
+
+        <div class="goal-metrics-row">
+          <div class="goal-metric-item">
+            <span class="goal-metric-lbl">SALARY</span>
+            <span class="goal-metric-val">${formatCurrency(salary)}</span>
+          </div>
+          <div class="goal-metric-item">
+            <span class="goal-metric-lbl">SAVINGS CUT</span>
+            <span class="goal-metric-val">${rate}% • ${formatCurrency(cutoffAmt)}/cutoff</span>
+          </div>
+          <div class="goal-metric-item">
+            <span class="goal-metric-lbl">EST. WRIST DATE</span>
+            <span class="goal-metric-val">${getEstimatedTargetDate(monthsLeft)}</span>
+          </div>
+        </div>
+
+        <div class="goal-progress-block">
+          <div class="goal-progress-text">
+            <span>${formatCurrency(saved)} / ${formatCurrency(price)}</span>
+            <span>${Math.round(pct)}%</span>
+          </div>
+          <div class="goal-bar-track">
+            <div class="goal-bar-fill" style="width: ${pct}%"></div>
+          </div>
+        </div>
+
+        <div class="goal-card-actions">
+          <button type="button" class="goal-deposit-btn">+ Log 15/30 Cutoff (${formatCurrency(cutoffAmt)})</button>
+          <button type="button" class="goal-load-btn">Load in Calculator</button>
+          <button type="button" class="goal-remove-btn">Remove</button>
+        </div>
+      `;
+
+      card.querySelector('.goal-deposit-btn').addEventListener('click', () => {
+        logCutoffDeposit(goal.id);
+      });
+
+      card.querySelector('.goal-load-btn').addEventListener('click', () => {
+        const matchedWatch = allWatchesCache.find((w) => w.id === goal.watch_id) || {
+          id: goal.watch_id,
+          brand: goal.brand,
+          model: goal.model,
+          nickname: goal.nickname,
+          price_php: goal.price_php,
+          image: goal.image
+        };
+        salaryInput.value = salary;
+        savingsSlider.value = rate;
+        displayWatch(matchedWatch);
+        closeLedgerDrawer();
+      });
+
+      card.querySelector('.goal-remove-btn').addEventListener('click', () => {
+        deleteGoal(goal.id);
+      });
+
+      goalsList.appendChild(card);
+    });
+  }
+
+  async function pinCurrentGoal() {
+    if (!selectedWatch || !selectedWatch.id) return;
+
+    if (!currentUser || !currentUser.id) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const salary = parseFloat(salaryInput.value);
+    const savingsPct = parseInt(savingsSlider.value, 10);
+
+    if (!salary || salary <= 0) {
+      salaryInput.focus();
+      verdictBadge.textContent = 'ENTER SALARY FIRST';
+      return;
+    }
+
+    pinGoalBtn.disabled = true;
+    pinGoalBtn.textContent = 'Pinning...';
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/broke-oclock/goals`, {
         method: 'POST',
         headers: getApiHeaders(),
         body: JSON.stringify({
           user_id: currentUser.id,
-          watch_id: selectedWatch.id
+          watch_id: selectedWatch.id,
+          monthly_salary: salary,
+          savings_rate: savingsPct,
+          verdict: verdictBadge.textContent
         })
       });
-      if (!response.ok) throw new Error('Failed to add favorite.');
-    }
 
-    await fetchUserFavorites();
-  } catch (error) {
-    console.error('Favorite toggle error:', error);
-  } finally {
-    favoriteToggleBtn.disabled = false;
-  }
-}
-
-/* Fetch user grail goals */
-async function fetchUserGoals() {
-  if (!currentUser || !currentUser.id) return;
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/broke-oclock/users/${currentUser.id}/goals`, {
-      method: 'GET',
-      headers: getApiHeaders()
-    });
-
-    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-    const data = await response.json();
-    userGoals = data.goals || [];
-    goalsCount.textContent = userGoals.length;
-    renderGoalsList();
-  } catch (error) {
-    console.error('Failed to fetch goals:', error);
-  }
-}
-
-/* Pin current calculation as a grail goal */
-async function pinCurrentGoal() {
-  if (!selectedWatch || !selectedWatch.id) return;
-
-  if (!currentUser || !currentUser.id) {
-    openAuthModal();
-    return;
-  }
-
-  const salary = parseFloat(salaryInput.value);
-  const savingsPct = parseInt(savingsSlider.value, 10);
-
-  if (!salary || salary <= 0) {
-    salaryInput.focus();
-    verdictBadge.textContent = 'Enter Salary First';
-    return;
-  }
-
-  pinGoalBtn.disabled = true;
-  pinGoalBtn.textContent = 'Pinning...';
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/broke-oclock/goals`, {
-      method: 'POST',
-      headers: getApiHeaders(),
-      body: JSON.stringify({
-        user_id: currentUser.id,
-        watch_id: selectedWatch.id,
-        monthly_salary: salary,
-        savings_rate: savingsPct,
-        verdict: verdictBadge.textContent
-      })
-    });
-
-    if (!response.ok) throw new Error('Failed to pin goal.');
-    await fetchUserGoals();
-    pinGoalBtn.textContent = 'Pinned ✓';
-    setTimeout(() => {
+      if (!response.ok) throw new Error('Failed to pin goal.');
+      await fetchUserGoals();
+      pinGoalBtn.textContent = 'Pinned ✓';
+      setTimeout(() => {
+        pinGoalBtn.textContent = '+ Pin Goal';
+      }, 1500);
+    } catch (error) {
+      console.error('Pin goal error:', error);
       pinGoalBtn.textContent = '+ Pin Goal';
-    }, 1500);
-  } catch (error) {
-    console.error('Pin goal error:', error);
-    pinGoalBtn.textContent = '+ Pin Goal';
-  } finally {
-    pinGoalBtn.disabled = false;
+    } finally {
+      pinGoalBtn.disabled = false;
+    }
   }
-}
 
-/* Log one 15/30 payday cutoff deposit toward a goal */
-async function logCutoffDeposit(goalId) {
-  if (!currentUser || !currentUser.id) return;
+  async function logCutoffDeposit(goalId) {
+    if (!currentUser || !currentUser.id) return;
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/broke-oclock/goals/${goalId}/deposit`, {
-      method: 'PATCH',
-      headers: getApiHeaders(),
-      body: JSON.stringify({ user_id: currentUser.id })
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/broke-oclock/goals/${goalId}/deposit`, {
+        method: 'PATCH',
+        headers: getApiHeaders(),
+        body: JSON.stringify({ user_id: currentUser.id })
+      });
+
+      if (!response.ok) throw new Error('Failed to log deposit.');
+      await fetchUserGoals();
+    } catch (error) {
+      console.error('Deposit error:', error);
+    }
+  }
+
+  async function deleteGoal(goalId) {
+    if (!currentUser || !currentUser.id) return;
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/broke-oclock/goals/${goalId}?user_id=${currentUser.id}`,
+        {
+          method: 'DELETE',
+          headers: getApiHeaders()
+        }
+      );
+
+      if (!response.ok) throw new Error('Failed to remove goal.');
+      await fetchUserGoals();
+    } catch (error) {
+      console.error('Delete goal error:', error);
+    }
+  }
+
+  /* Open Top 5 Closest Watches Modal (Frame 4) */
+  async function openClosestWatchesModal() {
+    const salary = parseFloat(salaryInput.value);
+    if (!salary || salary <= 0) {
+      salaryInput.focus();
+      verdictBadge.textContent = 'ENTER SALARY FIRST';
+      return;
+    }
+
+    affordableBackdrop.classList.remove('hidden');
+    affordableList.innerHTML = '';
+
+    const savingsPct = parseInt(savingsSlider.value, 10);
+    const monthlyAlloc = salary * (savingsPct / 100);
+
+    if (allWatchesCache.length === 0) {
+      affordableSummary.textContent = 'Loading watch catalog...';
+      await fetchAllWatches();
+    }
+
+    if (allWatchesCache.length === 0) {
+      affordableSummary.textContent = 'No watches available right now.';
+      return;
+    }
+
+    const topFive = [...allWatchesCache]
+      .sort((a, b) => parseFloat(a.price_php || 0) - parseFloat(b.price_php || 0))
+      .slice(0, 5);
+
+    affordableSummary.textContent = `Saving ${formatCurrency(monthlyAlloc)}/month (${savingsPct}% of ${formatCurrency(salary)})`;
+
+    topFive.forEach((watch, index) => {
+      const price = parseFloat(watch.price_php || 0);
+      const monthsNeeded = price / monthlyAlloc;
+      const yearsNeeded = (monthsNeeded / 12).toFixed(1);
+      const paydaysNeeded = Math.ceil(monthsNeeded * 2);
+
+      const row = document.createElement('div');
+      row.className = 'closest-row';
+      row.innerHTML = `
+        <div class="closest-left">
+          <span class="rank-square ${index === 0 ? 'rank-first' : ''}">#${index + 1}</span>
+          <div class="closest-watch-info">
+            <span class="closest-watch-title">${watch.brand} ${watch.model}</span>
+            <span class="closest-watch-sub">${formatCurrency(price)} • ${paydaysNeeded.toLocaleString()} paydays • ${monthsNeeded.toFixed(1)} months</span>
+          </div>
+        </div>
+        <div class="closest-right">
+          <span class="years-badge">${yearsNeeded} yrs</span>
+          <button type="button" class="closest-load-btn">Load in Calculator</button>
+        </div>
+      `;
+
+      row.querySelector('.closest-load-btn').addEventListener('click', () => {
+        displayWatch(watch);
+        affordableBackdrop.classList.add('hidden');
+      });
+
+      affordableList.appendChild(row);
     });
-
-    if (!response.ok) throw new Error('Failed to log cutoff deposit.');
-    await fetchUserGoals();
-  } catch (error) {
-    console.error('Deposit error:', error);
   }
-}
 
-/* Delete a saved goal */
-async function deleteGoal(goalId) {
-  if (!currentUser || !currentUser.id) return;
-
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/broke-oclock/goals/${goalId}?user_id=${currentUser.id}`,
-      {
-        method: 'DELETE',
+  /* Fetch All Watches */
+  async function fetchAllWatches() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/watches`, {
+        method: 'GET',
         headers: getApiHeaders()
-      }
-    );
-
-    if (!response.ok) throw new Error('Failed to remove goal.');
-    await fetchUserGoals();
-  } catch (error) {
-    console.error('Delete goal error:', error);
-  }
-}
-
-/* Compute estimated target month and year */
-function getEstimatedTargetDate(monthsRemaining) {
-  if (monthsRemaining <= 0) return 'Goal Reached';
-  const target = new Date();
-  target.setMonth(target.getMonth() + Math.ceil(monthsRemaining));
-  return target.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-}
-
-/* Render grail goals inside modal */
-function renderGoalsList() {
-  goalsList.innerHTML = '';
-
-  if (userGoals.length === 0) {
-    goalsStatusMsg.textContent = 'No pinned grail goals yet. Enter your salary on the dashboard and click "+ Pin Goal".';
-    return;
+      });
+      if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+      const data = await response.json();
+      allWatchesCache = data.watches || [];
+      return allWatchesCache;
+    } catch (error) {
+      console.error('Failed to fetch watches:', error);
+      return [];
+    }
   }
 
-  goalsStatusMsg.textContent = 'Track your pinned watch budgets and log every 15/30 payday cutoff.';
+  /* Search Watches */
+  async function searchWatches(query) {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/watches/search?q=${encodeURIComponent(query)}`,
+        {
+          method: 'GET',
+          headers: getApiHeaders()
+        }
+      );
+      if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+      const data = await response.json();
+      return data.results || [];
+    } catch (error) {
+      console.error('Search error:', error);
+      return [];
+    }
+  }
 
-  userGoals.forEach((goal) => {
-    const price = parseFloat(goal.price_php || 0);
-    const saved = parseFloat(goal.amount_saved || 0);
-    const salary = parseFloat(goal.monthly_salary || 0);
-    const rate = parseInt(goal.savings_rate || 20, 10);
-    const monthlyAlloc = salary * (rate / 100);
-    const cutoffAmt = monthlyAlloc / 2;
-    const remaining = Math.max(0, price - saved);
-    const monthsLeft = monthlyAlloc > 0 ? remaining / monthlyAlloc : 0;
-    const pct = price > 0 ? Math.min(100, (saved / price) * 100) : 0;
+  function showSearchDropdown(items) {
+    searchDropdown.innerHTML = '';
 
-    const item = document.createElement('div');
-    item.className = 'goal-item';
-    item.innerHTML = `
-      <div class="goal-item-top">
-        <div>
-          <div class="goal-watch-name">${goal.brand} ${goal.model}</div>
-          <div class="goal-watch-meta">
-            Salary: ${formatCurrency(salary)} (${rate}% cut = ${formatCurrency(cutoffAmt)}/cutoff) • Est. Wrist: ${getEstimatedTargetDate(monthsLeft)}
-          </div>
-        </div>
-        <span class="goal-verdict-pill">${goal.verdict || 'Goal'}</span>
-      </div>
+    if (!items || items.length === 0) {
+      const emptyRow = document.createElement('div');
+      emptyRow.className = 'search-result-row';
+      emptyRow.textContent = 'No watches found';
+      searchDropdown.appendChild(emptyRow);
+      searchDropdown.classList.remove('hidden');
+      return;
+    }
 
-      <div class="goal-progress-wrap">
-        <div class="goal-progress-labels">
-          <span>${formatCurrency(saved)} / ${formatCurrency(price)}</span>
-          <span>${pct.toFixed(1)}%</span>
-        </div>
-        <div class="goal-progress-track">
-          <div class="goal-progress-fill" style="width: ${pct}%"></div>
-        </div>
-      </div>
+    items.forEach((item) => {
+      const row = document.createElement('div');
+      row.className = 'search-result-row';
+      row.innerHTML = `
+        <span><strong>${item.brand}</strong> • ${item.model}</span>
+        <span class="search-result-price">${formatCurrency(item.price_php || 0)}</span>
+      `;
 
-      <div class="goal-actions">
-        <button type="button" class="goal-btn goal-btn-deposit">+ Log 15/30 Cutoff (${formatCurrency(cutoffAmt)})</button>
-        <button type="button" class="goal-btn goal-btn-load">Load in Calculator</button>
-        <button type="button" class="goal-btn goal-btn-delete">Remove</button>
-      </div>
-    `;
+      row.addEventListener('click', () => {
+        displayWatch(item);
+        searchDropdown.classList.add('hidden');
+        watchSearch.value = '';
+      });
 
-    item.querySelector('.goal-btn-deposit').addEventListener('click', () => {
-      logCutoffDeposit(goal.id);
+      searchDropdown.appendChild(row);
     });
 
-    item.querySelector('.goal-btn-load').addEventListener('click', () => {
-      const matchedWatch = allWatchesCache.find((w) => w.id === goal.watch_id) || {
-        id: goal.watch_id,
-        brand: goal.brand,
-        model: goal.model,
-        nickname: goal.nickname,
-        price_php: goal.price_php,
-        image: goal.image
-      };
-      salaryInput.value = salary;
-      savingsSlider.value = rate;
-      displayWatch(matchedWatch);
-      goalsModal.classList.add('hidden');
-    });
-
-    item.querySelector('.goal-btn-delete').addEventListener('click', () => {
-      deleteGoal(goal.id);
-    });
-
-    goalsList.appendChild(item);
-  });
-}
-
-/* Open Top 5 Closest Watches Modal */
-async function openClosestWatchesModal() {
-  const salary = parseFloat(salaryInput.value);
-  if (!salary || salary <= 0) {
-    salaryInput.focus();
-    verdictBadge.textContent = 'Enter Salary First';
-    return;
-  }
-
-  affordableModal.classList.remove('hidden');
-  affordableList.innerHTML = '';
-
-  const savingsPct = parseInt(savingsSlider.value, 10);
-  const monthlyAlloc = salary * (savingsPct / 100);
-
-  if (allWatchesCache.length === 0) {
-    affordableSummary.textContent = 'Loading catalog...';
-    await fetchAllWatches();
-  }
-
-  if (allWatchesCache.length === 0) {
-    affordableSummary.textContent = 'No watches available right now.';
-    return;
-  }
-
-  const topFive = [...allWatchesCache]
-    .sort((a, b) => parseFloat(a.price_php || 0) - parseFloat(b.price_php || 0))
-    .slice(0, 5);
-
-  affordableSummary.textContent = `Ranked by fastest time to own saving ${formatCurrency(monthlyAlloc)}/month (${savingsPct}% of ${formatCurrency(salary)}):`;
-
-  topFive.forEach((watch, index) => {
-    const price = parseFloat(watch.price_php || 0);
-    const monthsNeeded = price / monthlyAlloc;
-    const yearsNeeded = (monthsNeeded / 12).toFixed(1);
-    const paydaysNeeded = Math.ceil(monthsNeeded * 2);
-
-    const card = document.createElement('div');
-    card.className = 'goal-item';
-    card.innerHTML = `
-      <div class="goal-item-top">
-        <div>
-          <div class="goal-watch-name">#${index + 1} ${watch.brand} ${watch.model}</div>
-          <div class="goal-watch-meta">
-            Price: ${formatCurrency(price)} • ${paydaysNeeded.toLocaleString()} paydays (${Math.ceil(monthsNeeded)} mos)
-          </div>
-        </div>
-        <span class="goal-verdict-pill">${yearsNeeded} yrs</span>
-      </div>
-      <div class="goal-actions">
-        <button type="button" class="goal-btn goal-btn-deposit">Load in Calculator</button>
-      </div>
-    `;
-
-    card.querySelector('.goal-btn-deposit').addEventListener('click', () => {
-      displayWatch(watch);
-      affordableModal.classList.add('hidden');
-    });
-
-    affordableList.appendChild(card);
-  });
-}
-
-/* Fetch all watches */
-async function fetchAllWatches() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/watches`, {
-      method: 'GET',
-      headers: getApiHeaders()
-    });
-
-    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-    const data = await response.json();
-    allWatchesCache = data.watches || [];
-    return allWatchesCache;
-  } catch (error) {
-    console.error('Failed to fetch watches list:', error);
-    return [];
-  }
-}
-
-/* Search watches */
-async function searchWatches(query) {
-  try {
-    const url = `${API_BASE_URL}/api/v1/watches/search?q=${encodeURIComponent(query)}`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: getApiHeaders()
-    });
-
-    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-    const data = await response.json();
-    return data.results || [];
-  } catch (error) {
-    console.error('API connection error:', error);
-    return [];
-  }
-}
-
-/* Populate the Watch Card */
-function displayWatch(watch) {
-  selectedWatch = watch;
-
-  watchBrand.textContent = watch.brand ? watch.brand.toUpperCase() : 'WATCH BRAND';
-  specYear.textContent = watch.year || watch.release_year || '----';
-  watchModel.textContent = watch.model || 'Select a watch';
-  watchNickname.textContent = watch.nickname ? `"${watch.nickname}"` : '';
-
-  const priceVal = watch.price_php || watch.price || 0;
-  watchPrice.textContent = formatCurrency(priceVal);
-
-  const caseDiameter = watch.case_size_mm || watch.case_diameter_mm || watch.case_diameter || watch.case_size;
-  specCase.textContent = caseDiameter ? `${caseDiameter} mm` : '-- mm';
-
-  specMovement.textContent = watch.movement || watch.calibre || watch.caliber || '--';
-  specCategory.textContent = watch.category || '--';
-  specOrigin.textContent = watch.origin || '--';
-
-  /* Additional balanced attributes */
-  specRef.textContent = watch.reference_number || watch.reference || watch.ref || 'Ref. Standard';
-  
-  const powerReserve = watch.power_reserve_hours || watch.power_reserve || watch.complication;
-  specReserve.textContent = powerReserve 
-    ? (typeof powerReserve === 'number' ? `${powerReserve} Hours` : powerReserve)
-    : '70 Hours';
-
-  /* Local image path resolver */
-  const rawImagePath = watch.image || watch.image_url || watch.img || '';
-
-  if (rawImagePath && typeof rawImagePath === 'string' && rawImagePath.trim() !== '') {
-    const fileName = rawImagePath.split('/').pop().trim();
-    const localSrc = `images/${fileName}`;
-
-    watchImg.onload = () => {
-      watchImg.classList.remove('hidden');
-      watchImg.style.display = 'block';
-      imagePlaceholder.classList.add('hidden');
-      imagePlaceholder.style.display = 'none';
-    };
-
-    watchImg.onerror = () => {
-      watchImg.classList.add('hidden');
-      watchImg.style.display = 'none';
-      imagePlaceholder.classList.remove('hidden');
-      imagePlaceholder.style.display = 'block';
-    };
-
-    watchImg.src = localSrc;
-  } else {
-    watchImg.classList.add('hidden');
-    watchImg.style.display = 'none';
-    imagePlaceholder.classList.remove('hidden');
-    imagePlaceholder.style.display = 'block';
-  }
-
-  updateFavoriteToggleState();
-  calculateReality();
-}
-
-/* Calculation engine */
-function calculateReality() {
-  const salary = parseFloat(salaryInput.value);
-  const savingsPct = parseInt(savingsSlider.value, 10);
-  savingsDisplay.textContent = `${savingsPct}%`;
-
-  if (!selectedWatch || !salary || salary <= 0) {
-    outYears.textContent = '--';
-    outCutoffs.textContent = '--';
-    outHours.textContent = '--';
-    verdictBadge.textContent = 'Awaiting Input';
-    equivalentsList.innerHTML = '<li>Enter your salary above to view trade-offs.</li>';
-    return;
-  }
-
-  const price = parseFloat(selectedWatch.price_php || selectedWatch.price || 0);
-  const monthlyAllocation = salary * (savingsPct / 100);
-
-  const monthsNeeded = price / monthlyAllocation;
-  const yearsNeeded = (monthsNeeded / 12).toFixed(1);
-  const cutoffsNeeded = Math.ceil(monthsNeeded * 2);
-  const hourlyRate = salary / 176;
-  const hoursNeeded = Math.ceil(price / hourlyRate);
-
-  outYears.textContent = yearsNeeded;
-  outCutoffs.textContent = cutoffsNeeded.toLocaleString();
-  outHours.textContent = hoursNeeded.toLocaleString();
-
-  if (monthsNeeded <= 6) {
-    verdictBadge.textContent = 'Financially Sane';
-  } else if (monthsNeeded <= 24) {
-    verdictBadge.textContent = 'Major Commitment';
-  } else if (monthsNeeded <= 60) {
-    verdictBadge.textContent = 'Midlife Crisis Level';
-  } else {
-    verdictBadge.textContent = 'Generational Debt';
-  }
-
-  const jollibeeMeals = Math.floor(price / 180);
-  const icedCoffees = Math.floor(price / 190);
-  const iPhones = (price / 85000).toFixed(1);
-  const studioRents = Math.floor(price / 15000);
-
-  equivalentsList.innerHTML = `
-    <li><strong>${jollibeeMeals.toLocaleString()}</strong> 2-pc Chickenjoy with rice meals</li>
-    <li><strong>${icedCoffees.toLocaleString()}</strong> Spanish Lattes from local cafés</li>
-    <li><strong>${iPhones}</strong> flagship iPhones at retail price</li>
-    <li><strong>${studioRents}</strong> months of Metro studio rent</li>
-  `;
-
-  if (monthsNeeded <= 12) {
-    humorQuote.textContent = '"A year of discipline. Entirely doable if you cut unli-samgyup."';
-  } else if (monthsNeeded <= 60) {
-    humorQuote.textContent = '"Your wrist will look brilliant while your savings account weeps softly."';
-  } else if (monthsNeeded <= 120) {
-    humorQuote.textContent = '"A decade of labor. By then, the service cost alone will need a loan."';
-  } else {
-    humorQuote.textContent = '"Leave this page open as your desktop wallpaper for character development."';
-  }
-}
-
-/* Render search dropdown items */
-function showDropdown(items) {
-  searchDropdown.innerHTML = '';
-
-  if (!items || items.length === 0) {
-    const emptyRow = document.createElement('div');
-    emptyRow.className = 'search-item';
-    emptyRow.textContent = 'No watches found';
-    searchDropdown.appendChild(emptyRow);
     searchDropdown.classList.remove('hidden');
-    return;
   }
 
-  items.forEach((item) => {
-    const row = document.createElement('div');
-    row.className = 'search-item';
-    row.innerHTML = `
-      <span>${item.model}</span>
-      <span class="search-item-brand">${item.brand}</span>
-    `;
+  /* Populate Watch Card */
+  function displayWatch(watch) {
+    selectedWatch = watch;
 
-    row.addEventListener('click', () => {
-      displayWatch(item);
-      searchDropdown.classList.add('hidden');
-      searchInput.value = '';
-    });
+    const brandLabel = watch.brand ? watch.brand.toUpperCase() : 'WATCH BRAND';
+    const yearLabel = watch.year || watch.release_year || '----';
+    watchBrandYear.textContent = `${brandLabel} • ${yearLabel}`;
 
-    searchDropdown.appendChild(row);
+    watchModel.textContent = watch.model || 'Select a watch';
+    watchNickname.textContent = watch.nickname ? `"${watch.nickname}"` : '';
+
+    const priceVal = watch.price_php || watch.price || 0;
+    watchPrice.textContent = formatCurrency(priceVal);
+
+    const caseDiameter = watch.case_size_mm || watch.case_diameter_mm || watch.case_size;
+    specCase.textContent = caseDiameter ? `${caseDiameter} mm` : '-- mm';
+    specMovement.textContent = watch.movement || watch.calibre || '--';
+    specCategory.textContent = watch.category || '--';
+    specOrigin.textContent = watch.origin || '--';
+    specRef.textContent = watch.reference_number || watch.reference || '--';
+
+    const powerReserve = watch.power_reserve_hours || watch.power_reserve;
+    specReserve.textContent = powerReserve
+      ? (typeof powerReserve === 'number' ? `${powerReserve} hrs` : powerReserve)
+      : '70 hrs';
+
+    const rawImagePath = watch.image || watch.image_url || '';
+    if (rawImagePath && typeof rawImagePath === 'string' && rawImagePath.trim() !== '') {
+      const fileName = rawImagePath.split('/').pop().trim();
+      const localSrc = `images/${fileName}`;
+
+      watchImg.onload = () => {
+        watchImg.classList.remove('hidden');
+        imagePlaceholder.classList.add('hidden');
+      };
+
+      watchImg.onerror = () => {
+        watchImg.classList.add('hidden');
+        imagePlaceholder.classList.remove('hidden');
+      };
+
+      watchImg.src = localSrc;
+    } else {
+      watchImg.classList.add('hidden');
+      imagePlaceholder.classList.remove('hidden');
+    }
+
+    updateFavoriteButtonState();
+    calculateReality();
+  }
+
+  /* Reality Check Calculation Engine */
+  function calculateReality() {
+    const salary = parseFloat(salaryInput.value);
+    const savingsPct = parseInt(savingsSlider.value, 10);
+    savingsDisplay.textContent = `${savingsPct}%`;
+
+    if (!selectedWatch || !salary || salary <= 0) {
+      outYears.textContent = '--';
+      outCutoffs.textContent = '--';
+      outHours.textContent = '--';
+      verdictBadge.textContent = 'AWAITING INPUT';
+      verdictBadge.classList.remove('verdict-alert');
+      eqChicken.textContent = '--';
+      eqCoffee.textContent = '--';
+      eqIphones.textContent = '--';
+      eqRent.textContent = '--';
+      humorQuote.textContent = '"Enter your salary above to calculate your reality."';
+      return;
+    }
+
+    const price = parseFloat(selectedWatch.price_php || selectedWatch.price || 0);
+    const monthlyAllocation = salary * (savingsPct / 100);
+
+    const monthsNeeded = price / monthlyAllocation;
+    const yearsNeeded = (monthsNeeded / 12).toFixed(1);
+    const cutoffsNeeded = Math.ceil(monthsNeeded * 2);
+    const hourlyRate = salary / 176;
+    const hoursNeeded = Math.ceil(price / hourlyRate);
+
+    outYears.textContent = yearsNeeded;
+    outCutoffs.textContent = cutoffsNeeded.toLocaleString();
+    outHours.textContent = hoursNeeded.toLocaleString();
+
+    if (monthsNeeded <= 6) {
+      verdictBadge.textContent = 'FINANCIALLY SANE';
+      verdictBadge.classList.remove('verdict-alert');
+    } else if (monthsNeeded <= 24) {
+      verdictBadge.textContent = 'MAJOR COMMITMENT';
+      verdictBadge.classList.remove('verdict-alert');
+    } else if (monthsNeeded <= 60) {
+      verdictBadge.textContent = 'MIDLIFE CRISIS LEVEL';
+      verdictBadge.classList.add('verdict-alert');
+    } else {
+      verdictBadge.textContent = 'GENERATIONAL DEBT';
+      verdictBadge.classList.add('verdict-alert');
+    }
+
+    eqChicken.textContent = Math.floor(price / 180).toLocaleString();
+    eqCoffee.textContent = Math.floor(price / 190).toLocaleString();
+    eqIphones.textContent = (price / 85000).toFixed(1);
+    eqRent.textContent = Math.floor(price / 15000).toLocaleString();
+
+    if (monthsNeeded <= 12) {
+      humorQuote.textContent = '"A year of discipline. Entirely doable if you cut unli-samgyup."';
+    } else if (monthsNeeded <= 60) {
+      humorQuote.textContent = '"Your wrist will look brilliant while your savings account weeps softly."';
+    } else if (monthsNeeded <= 120) {
+      humorQuote.textContent = '"That’s not a watch. That’s a mortgage with a bezel."';
+    } else {
+      humorQuote.textContent = '"Leave this page open as your desktop wallpaper for character development."';
+    }
+  }
+
+  /* Event Listeners */
+  navAuthBtn.addEventListener('click', () => {
+    if (currentUser) {
+      localStorage.removeItem(USER_STORAGE_KEY);
+      syncUserSession();
+    } else {
+      window.location.href = 'login.html';
+    }
   });
 
-  searchDropdown.classList.remove('hidden');
-}
+  navFavoritesBtn.addEventListener('click', () => openLedgerDrawer('favorites'));
+  navGoalsBtn.addEventListener('click', () => openLedgerDrawer('goals'));
+  ledgerCloseBtn.addEventListener('click', closeLedgerDrawer);
+  ledgerBackdrop.addEventListener('click', (e) => {
+    if (e.target === ledgerBackdrop) closeLedgerDrawer();
+  });
 
-/* Auth Event Listeners */
-navAuthBtn.addEventListener('click', () => {
-  if (currentUser) {
-    localStorage.removeItem(USER_STORAGE_KEY);
-    syncUserSession();
-  } else {
-    openAuthModal();
-  }
-});
+  favoriteToggleBtn.addEventListener('click', toggleSelectedWatchFavorite);
+  pinGoalBtn.addEventListener('click', pinCurrentGoal);
 
-authCloseBtn.addEventListener('click', closeAuthModal);
+  affordableBtn.addEventListener('click', openClosestWatchesModal);
+  affordableCloseBtn.addEventListener('click', () => affordableBackdrop.classList.add('hidden'));
+  affordableBackdrop.addEventListener('click', (e) => {
+    if (e.target === affordableBackdrop) affordableBackdrop.classList.add('hidden');
+  });
 
-authModal.addEventListener('click', (e) => {
-  if (e.target === authModal) {
-    closeAuthModal();
-  }
-});
-
-authSwitchBtn.addEventListener('click', () => {
-  isRegisterMode = !isRegisterMode;
-  authMessage.textContent = '';
-  authMessage.className = 'auth-message';
-
-  if (isRegisterMode) {
-    authModalTitle.textContent = 'Create Account';
-    authModalSubtitle.textContent = 'Create an account to save your favorite watches and grail goals.';
-    authSubmitBtn.textContent = 'CREATE ACCOUNT';
-    authSwitchPrompt.textContent = 'Already have an account?';
-    authSwitchBtn.textContent = 'Sign In';
-  } else {
-    authModalTitle.textContent = 'Sign In';
-    authModalSubtitle.textContent = 'Sign in to sync your favorite watches and grail goals.';
-    authSubmitBtn.textContent = 'SIGN IN';
-    authSwitchPrompt.textContent = "Don't have an account?";
-    authSwitchBtn.textContent = 'Create Account';
-  }
-});
-
-authForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const username = document.getElementById('auth-username').value.trim();
-  const password = document.getElementById('auth-password').value;
-
-  authSubmitBtn.disabled = true;
-  authSubmitBtn.textContent = 'PLEASE WAIT...';
-  authMessage.textContent = '';
-
-  const endpoint = isRegisterMode ? '/api/v1/auth/register' : '/api/v1/auth/login';
-
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'POST',
-      headers: getApiHeaders(),
-      body: JSON.stringify({ username, password })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.detail || 'Authentication failed.');
+  watchSearch.addEventListener('input', async (e) => {
+    const query = e.target.value.trim();
+    if (query.length < 2) {
+      searchDropdown.classList.add('hidden');
+      return;
     }
+    const results = await searchWatches(query);
+    showSearchDropdown(results);
+  });
 
-    if (isRegisterMode) {
-      authMessage.textContent = 'Account created. Please sign in.';
-      authMessage.className = 'auth-message success';
-      isRegisterMode = false;
-      authModalTitle.textContent = 'Sign In';
-      authModalSubtitle.textContent = 'Sign in to sync your favorite watches and grail goals.';
-      authSubmitBtn.textContent = 'SIGN IN';
-      authSwitchPrompt.textContent = "Don't have an account?";
-      authSwitchBtn.textContent = 'Create Account';
-      document.getElementById('auth-password').value = '';
-    } else {
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
-      closeAuthModal();
-      await syncUserSession();
-    }
-  } catch (error) {
-    authMessage.textContent = error.message;
-    authMessage.className = 'auth-message error';
-    authSubmitBtn.textContent = isRegisterMode ? 'CREATE ACCOUNT' : 'SIGN IN';
-  } finally {
-    authSubmitBtn.disabled = false;
-  }
-});
-
-/* Favorites, Goals, and Closest Watches Event Listeners */
-favoritesBtn.addEventListener('click', () => {
-  favoritesDropdown.classList.toggle('hidden');
-  searchDropdown.classList.add('hidden');
-});
-
-favoriteToggleBtn.addEventListener('click', toggleSelectedWatchFavorite);
-
-pinGoalBtn.addEventListener('click', pinCurrentGoal);
-
-goalsBtn.addEventListener('click', () => {
-  favoritesDropdown.classList.add('hidden');
-  searchDropdown.classList.add('hidden');
-  goalsModal.classList.remove('hidden');
-});
-
-goalsCloseBtn.addEventListener('click', () => {
-  goalsModal.classList.add('hidden');
-});
-
-goalsModal.addEventListener('click', (e) => {
-  if (e.target === goalsModal) {
-    goalsModal.classList.add('hidden');
-  }
-});
-
-affordableBtn.addEventListener('click', openClosestWatchesModal);
-
-affordableCloseBtn.addEventListener('click', () => {
-  affordableModal.classList.add('hidden');
-});
-
-affordableModal.addEventListener('click', (e) => {
-  if (e.target === affordableModal) {
-    affordableModal.classList.add('hidden');
-  }
-});
-
-/* Search and Calculator Event Listeners */
-searchInput.addEventListener('input', async (e) => {
-  const query = e.target.value.trim();
-  if (query.length < 2) {
-    searchDropdown.classList.add('hidden');
-    return;
-  }
-  const results = await searchWatches(query);
-  showDropdown(results);
-});
-
-searchBtn.addEventListener('click', async () => {
-  const query = searchInput.value.trim();
-  if (!query) return;
-  const results = await searchWatches(query);
-  showDropdown(results);
-});
-
-searchInput.addEventListener('keydown', async (e) => {
-  if (e.key === 'Enter') {
-    const query = searchInput.value.trim();
+  searchBtn.addEventListener('click', async () => {
+    const query = watchSearch.value.trim();
     if (!query) return;
     const results = await searchWatches(query);
-    showDropdown(results);
-  }
-});
+    showSearchDropdown(results);
+  });
 
-salaryInput.addEventListener('input', calculateReality);
-savingsSlider.addEventListener('input', calculateReality);
+  watchSearch.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter') {
+      const query = watchSearch.value.trim();
+      if (!query) return;
+      const results = await searchWatches(query);
+      showSearchDropdown(results);
+    }
+  });
 
-/* Close dropdowns on outside click */
-document.addEventListener('click', (e) => {
-  if (!searchDropdown.contains(e.target) && e.target !== searchInput && e.target !== searchBtn) {
-    searchDropdown.classList.add('hidden');
-  }
-  if (!favoritesDropdown.contains(e.target) && e.target !== favoritesBtn) {
-    favoritesDropdown.classList.add('hidden');
-  }
-});
+  salaryInput.addEventListener('input', calculateReality);
+  savingsSlider.addEventListener('input', calculateReality);
 
-/* Default initialization on load */
-window.addEventListener('DOMContentLoaded', async () => {
-  await syncUserSession();
-  const watches = await fetchAllWatches();
-  if (watches.length > 0) {
-    displayWatch(watches[0]);
-  }
+  document.addEventListener('click', (e) => {
+    if (!searchDropdown.contains(e.target) && e.target !== watchSearch && e.target !== searchBtn) {
+      searchDropdown.classList.add('hidden');
+    }
+  });
+
+  /* Initial Load */
+  (async () => {
+    await syncUserSession();
+    const watches = await fetchAllWatches();
+    if (watches.length > 0) {
+      displayWatch(watches[0]);
+    }
+  })();
+}
+
+/* Boot Active Page */
+window.addEventListener('DOMContentLoaded', () => {
+  initLoginPage();
+  initDashboardPage();
 });
