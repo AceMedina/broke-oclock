@@ -1,11 +1,30 @@
 /* Configuration */
 const API_BASE_URL = 'https://watch-api-eight.vercel.app';
 const API_KEY = 'broke-oclock-003';
+const USER_STORAGE_KEY = 'watch_user';
 
-/* DOM Elements - Search */
+/* DOM Elements - Navigation and Auth */
+const navUserBadge = document.getElementById('nav-user-badge');
+const navAuthBtn = document.getElementById('nav-auth-btn');
+const authModal = document.getElementById('auth-modal');
+const authCloseBtn = document.getElementById('auth-close-btn');
+const authForm = document.getElementById('auth-form');
+const authModalTitle = document.getElementById('auth-modal-title');
+const authModalSubtitle = document.getElementById('auth-modal-subtitle');
+const authSubmitBtn = document.getElementById('auth-submit-btn');
+const authSwitchPrompt = document.getElementById('auth-switch-prompt');
+const authSwitchBtn = document.getElementById('auth-switch-btn');
+const authMessage = document.getElementById('auth-message');
+
+/* DOM Elements - Search and Favorites */
 const searchInput = document.getElementById('watch-search');
 const searchBtn = document.getElementById('search-btn');
 const searchDropdown = document.getElementById('search-dropdown');
+const favoritesWrap = document.getElementById('favorites-wrap');
+const favoritesBtn = document.getElementById('favorites-btn');
+const favoritesCount = document.getElementById('favorites-count');
+const favoritesDropdown = document.getElementById('favorites-dropdown');
+const favoriteToggleBtn = document.getElementById('favorite-toggle-btn');
 
 /* DOM Elements - Watch Card */
 const watchBrand = document.getElementById('watch-brand');
@@ -37,6 +56,17 @@ const humorQuote = document.getElementById('humor-quote');
 
 /* State */
 let selectedWatch = null;
+let currentUser = null;
+let userFavorites = [];
+let isRegisterMode = false;
+
+/* Request headers helper */
+function getApiHeaders() {
+  return {
+    'x-api-key': API_KEY,
+    'Content-Type': 'application/json'
+  };
+}
 
 /* Currency helper */
 function formatCurrency(amount) {
@@ -47,15 +77,177 @@ function formatCurrency(amount) {
   }).format(amount);
 }
 
+/* Read logged-in user from localStorage */
+function loadSavedUser() {
+  try {
+    const raw = localStorage.getItem(USER_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.id && parsed.role !== 'guest') {
+      return parsed;
+    }
+    return null;
+  } catch (error) {
+    return null;
+  }
+}
+
+/* Update navbar and favorites UI for current user */
+async function syncUserSession() {
+  currentUser = loadSavedUser();
+
+  if (currentUser) {
+    navUserBadge.textContent = `@${currentUser.username}`;
+    navUserBadge.classList.remove('hidden');
+    navAuthBtn.textContent = 'Sign Out';
+    favoritesWrap.classList.remove('hidden');
+    await fetchUserFavorites();
+  } else {
+    userFavorites = [];
+    navUserBadge.textContent = '';
+    navUserBadge.classList.add('hidden');
+    navAuthBtn.textContent = 'Sign In';
+    favoritesWrap.classList.add('hidden');
+    favoritesDropdown.classList.add('hidden');
+  }
+
+  updateFavoriteToggleState();
+}
+
+/* Open and close auth modal */
+function openAuthModal() {
+  isRegisterMode = false;
+  authForm.reset();
+  authMessage.textContent = '';
+  authMessage.className = 'auth-message';
+  authModalTitle.textContent = 'Sign In';
+  authModalSubtitle.textContent = 'Sign in to sync your favorite watches.';
+  authSubmitBtn.textContent = 'SIGN IN';
+  authSwitchPrompt.textContent = "Don't have an account?";
+  authSwitchBtn.textContent = 'Create Account';
+  authModal.classList.remove('hidden');
+}
+
+function closeAuthModal() {
+  authModal.classList.add('hidden');
+}
+
+/* Fetch user favorites */
+async function fetchUserFavorites() {
+  if (!currentUser || !currentUser.id) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/users/${currentUser.id}/favorites`, {
+      method: 'GET',
+      headers: getApiHeaders()
+    });
+
+    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+    const data = await response.json();
+    userFavorites = data.favorites || [];
+    favoritesCount.textContent = userFavorites.length;
+    renderFavoritesDropdown();
+    updateFavoriteToggleState();
+  } catch (error) {
+    console.error('Failed to fetch favorites:', error);
+  }
+}
+
+/* Render user favorites dropdown */
+function renderFavoritesDropdown() {
+  favoritesDropdown.innerHTML = '';
+
+  if (userFavorites.length === 0) {
+    const emptyRow = document.createElement('div');
+    emptyRow.className = 'search-item';
+    emptyRow.textContent = 'No favorite watches yet';
+    favoritesDropdown.appendChild(emptyRow);
+    return;
+  }
+
+  userFavorites.forEach((watch) => {
+    const row = document.createElement('div');
+    row.className = 'search-item';
+    row.innerHTML = `
+      <span>${watch.model}</span>
+      <span class="search-item-brand">${formatCurrency(watch.price_php || 0)}</span>
+    `;
+
+    row.addEventListener('click', () => {
+      displayWatch(watch);
+      favoritesDropdown.classList.add('hidden');
+    });
+
+    favoritesDropdown.appendChild(row);
+  });
+}
+
+/* Update Favorite button on watch card */
+function updateFavoriteToggleState() {
+  if (!selectedWatch || !selectedWatch.id) {
+    favoriteToggleBtn.textContent = '+ Favorite';
+    favoriteToggleBtn.classList.remove('is-saved');
+    return;
+  }
+
+  const isSaved = userFavorites.some((item) => item.id === selectedWatch.id);
+  if (isSaved) {
+    favoriteToggleBtn.textContent = 'Favorited ★';
+    favoriteToggleBtn.classList.add('is-saved');
+  } else {
+    favoriteToggleBtn.textContent = '+ Favorite';
+    favoriteToggleBtn.classList.remove('is-saved');
+  }
+}
+
+/* Add or remove selected watch from favorites */
+async function toggleSelectedWatchFavorite() {
+  if (!selectedWatch || !selectedWatch.id) return;
+
+  if (!currentUser || !currentUser.id) {
+    openAuthModal();
+    return;
+  }
+
+  const isSaved = userFavorites.some((item) => item.id === selectedWatch.id);
+  favoriteToggleBtn.disabled = true;
+
+  try {
+    if (isSaved) {
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/favorites/${currentUser.id}/${selectedWatch.id}`,
+        {
+          method: 'DELETE',
+          headers: getApiHeaders()
+        }
+      );
+      if (!response.ok) throw new Error('Failed to remove favorite.');
+    } else {
+      const response = await fetch(`${API_BASE_URL}/api/v1/favorites`, {
+        method: 'POST',
+        headers: getApiHeaders(),
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          watch_id: selectedWatch.id
+        })
+      });
+      if (!response.ok) throw new Error('Failed to add favorite.');
+    }
+
+    await fetchUserFavorites();
+  } catch (error) {
+    console.error('Favorite toggle error:', error);
+  } finally {
+    favoriteToggleBtn.disabled = false;
+  }
+}
+
 /* Fetch all watches */
 async function fetchAllWatches() {
   try {
     const response = await fetch(`${API_BASE_URL}/api/v1/watches`, {
       method: 'GET',
-      headers: {
-        'x-api-key': API_KEY,
-        'Content-Type': 'application/json'
-      }
+      headers: getApiHeaders()
     });
 
     if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
@@ -73,10 +265,7 @@ async function searchWatches(query) {
     const url = `${API_BASE_URL}/api/v1/watches/search?q=${encodeURIComponent(query)}`;
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'x-api-key': API_KEY,
-        'Content-Type': 'application/json'
-      }
+      headers: getApiHeaders()
     });
 
     if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
@@ -144,6 +333,7 @@ function displayWatch(watch) {
     imagePlaceholder.style.display = 'block';
   }
 
+  updateFavoriteToggleState();
   calculateReality();
 }
 
@@ -241,7 +431,102 @@ function showDropdown(items) {
   searchDropdown.classList.remove('hidden');
 }
 
-/* Event listeners */
+/* Auth Event Listeners */
+navAuthBtn.addEventListener('click', () => {
+  if (currentUser) {
+    localStorage.removeItem(USER_STORAGE_KEY);
+    syncUserSession();
+  } else {
+    openAuthModal();
+  }
+});
+
+authCloseBtn.addEventListener('click', closeAuthModal);
+
+authModal.addEventListener('click', (e) => {
+  if (e.target === authModal) {
+    closeAuthModal();
+  }
+});
+
+authSwitchBtn.addEventListener('click', () => {
+  isRegisterMode = !isRegisterMode;
+  authMessage.textContent = '';
+  authMessage.className = 'auth-message';
+
+  if (isRegisterMode) {
+    authModalTitle.textContent = 'Create Account';
+    authModalSubtitle.textContent = 'Create an account to save your favorite watches.';
+    authSubmitBtn.textContent = 'CREATE ACCOUNT';
+    authSwitchPrompt.textContent = 'Already have an account?';
+    authSwitchBtn.textContent = 'Sign In';
+  } else {
+    authModalTitle.textContent = 'Sign In';
+    authModalSubtitle.textContent = 'Sign in to sync your favorite watches.';
+    authSubmitBtn.textContent = 'SIGN IN';
+    authSwitchPrompt.textContent = "Don't have an account?";
+    authSwitchBtn.textContent = 'Create Account';
+  }
+});
+
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const username = document.getElementById('auth-username').value.trim();
+  const password = document.getElementById('auth-password').value;
+
+  authSubmitBtn.disabled = true;
+  authSubmitBtn.textContent = 'PLEASE WAIT...';
+  authMessage.textContent = '';
+
+  const endpoint = isRegisterMode ? '/api/v1/auth/register' : '/api/v1/auth/login';
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: getApiHeaders(),
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.detail || 'Authentication failed.');
+    }
+
+    if (isRegisterMode) {
+      authMessage.textContent = 'Account created. Please sign in.';
+      authMessage.className = 'auth-message success';
+      isRegisterMode = false;
+      authModalTitle.textContent = 'Sign In';
+      authModalSubtitle.textContent = 'Sign in to sync your favorite watches.';
+      authSubmitBtn.textContent = 'SIGN IN';
+      authSwitchPrompt.textContent = "Don't have an account?";
+      authSwitchBtn.textContent = 'Create Account';
+      document.getElementById('auth-password').value = '';
+    } else {
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
+      closeAuthModal();
+      await syncUserSession();
+    }
+  } catch (error) {
+    authMessage.textContent = error.message;
+    authMessage.className = 'auth-message error';
+    authSubmitBtn.textContent = isRegisterMode ? 'CREATE ACCOUNT' : 'SIGN IN';
+  } finally {
+    authSubmitBtn.disabled = false;
+  }
+});
+
+/* Favorites Event Listeners */
+favoritesBtn.addEventListener('click', () => {
+  favoritesDropdown.classList.toggle('hidden');
+  searchDropdown.classList.add('hidden');
+});
+
+favoriteToggleBtn.addEventListener('click', toggleSelectedWatchFavorite);
+
+/* Search and Calculator Event Listeners */
 searchInput.addEventListener('input', async (e) => {
   const query = e.target.value.trim();
   if (query.length < 2) {
@@ -271,15 +556,19 @@ searchInput.addEventListener('keydown', async (e) => {
 salaryInput.addEventListener('input', calculateReality);
 savingsSlider.addEventListener('input', calculateReality);
 
-/* Close dropdown on outside click */
+/* Close dropdowns on outside click */
 document.addEventListener('click', (e) => {
   if (!searchDropdown.contains(e.target) && e.target !== searchInput && e.target !== searchBtn) {
     searchDropdown.classList.add('hidden');
+  }
+  if (!favoritesDropdown.contains(e.target) && e.target !== favoritesBtn) {
+    favoritesDropdown.classList.add('hidden');
   }
 });
 
 /* Default initialization on load */
 window.addEventListener('DOMContentLoaded', async () => {
+  await syncUserSession();
   const watches = await fetchAllWatches();
   if (watches.length > 0) {
     displayWatch(watches[0]);
