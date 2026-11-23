@@ -87,12 +87,13 @@ function initLoginPage() {
     authMessage.classList.remove('success');
     authMessage.textContent = '';
 
-    if (isRegisterMode) {
+   if (isRegisterMode) {
       tabRegister.classList.add('active');
       tabRegister.setAttribute('aria-selected', 'true');
       tabSignIn.classList.remove('active');
       tabSignIn.setAttribute('aria-selected', 'false');
       authSubmitBtn.textContent = 'CREATE ACCOUNT';
+      passwordInput.minLength = 8;
       passwordInput.setAttribute('autocomplete', 'new-password');
     } else {
       tabSignIn.classList.add('active');
@@ -100,6 +101,7 @@ function initLoginPage() {
       tabRegister.classList.remove('active');
       tabRegister.setAttribute('aria-selected', 'false');
       authSubmitBtn.textContent = 'SIGN IN';
+      passwordInput.minLength = 8;
       passwordInput.setAttribute('autocomplete', 'current-password');
     }
   }
@@ -113,10 +115,17 @@ function initLoginPage() {
     const username = usernameInput.value.trim();
     const password = passwordInput.value;
 
-    authSubmitBtn.disabled = true;
-    authSubmitBtn.textContent = 'PLEASE WAIT...';
     authMessage.classList.add('hidden');
     authMessage.classList.remove('success');
+
+    if (isRegisterMode && !/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(password)) {
+      authMessage.textContent = 'Password must be at least 8 characters with 1 letter and 1 number.';
+      authMessage.classList.remove('hidden');
+      return;
+    }
+
+    authSubmitBtn.disabled = true;
+    authSubmitBtn.textContent = 'PLEASE WAIT...';
 
     const endpoint = isRegisterMode ? '/api/v1/auth/register' : '/api/v1/auth/login';
 
@@ -129,7 +138,13 @@ function initLoginPage() {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || 'Incorrect username or password.');
+        if (response.status === 429) {
+          throw new Error('Too many login attempts. Please try again later.');
+        }
+        const detailMsg = Array.isArray(data.detail)
+          ? (data.detail[0]?.msg || 'Invalid input.')
+          : data.detail;
+        throw new Error(detailMsg || 'Incorrect username or password.');
       }
 
       if (isRegisterMode) {
