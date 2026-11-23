@@ -44,7 +44,7 @@
   <section id="dashboard" class="dashboard-section">
     <div class="dashboard-shell">
       
-      <!-- Search bar and favorites -->
+      <!-- Search bar, favorites, and goals -->
       <div class="search-row">
         <div class="search-wrap">
           <input 
@@ -62,6 +62,12 @@
             Favorites (<span id="favorites-count">0</span>)
           </button>
           <div id="favorites-dropdown" class="search-dropdown favorites-dropdown hidden"></div>
+        </div>
+
+        <div id="goals-wrap" class="favorites-wrap hidden">
+          <button type="button" id="goals-btn" class="favorites-btn goals-nav-btn">
+            Grail Goals (<span id="goals-count">0</span>)
+          </button>
         </div>
       </div>
 
@@ -139,7 +145,10 @@
           <div class="card calc-card">
             <div class="card-tag-row">
               <span class="tag-brand">FINANCIAL REALITY AUDIT</span>
-              <span id="verdict-badge" class="tag-status">Awaiting Input</span>
+              <div class="calc-tag-actions">
+                <button type="button" id="pin-goal-btn" class="pin-goal-btn" title="Pin current calculation as a goal">+ Pin Goal</button>
+                <span id="verdict-badge" class="tag-status">Awaiting Input</span>
+              </div>
             </div>
 
             <div class="inputs-stack">
@@ -220,7 +229,7 @@
 
       <div class="modal-body">
         <p id="auth-modal-subtitle" class="modal-subtitle">
-          Sign in to sync your favorite watches.
+          Sign in to sync your favorite watches and grail goals.
         </p>
 
         <form id="auth-form" class="modal-form">
@@ -247,6 +256,26 @@
           <span id="auth-switch-prompt">Don't have an account?</span>
           <button type="button" id="auth-switch-btn" class="modal-link-btn">Create Account</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grail Goals Modal -->
+  <div id="goals-modal" class="modal-backdrop hidden">
+    <div class="modal-card goals-modal-card">
+      <div class="modal-head">
+        <div>
+          <span class="modal-tag">15/30 SAHOD LEDGER</span>
+          <h2 class="modal-title">My Grail Goals</h2>
+        </div>
+        <button type="button" id="goals-close-btn" class="modal-close-btn" aria-label="Close goals modal">✕</button>
+      </div>
+
+      <div class="modal-body goals-modal-body">
+        <p id="goals-status-msg" class="modal-subtitle">
+          Track your pinned watch budgets and log every 15/30 payday cutoff.
+        </p>
+        <div id="goals-list" class="goals-list"></div>
       </div>
     </div>
   </div>

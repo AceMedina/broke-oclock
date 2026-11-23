@@ -16,7 +16,7 @@ const authSwitchPrompt = document.getElementById('auth-switch-prompt');
 const authSwitchBtn = document.getElementById('auth-switch-btn');
 const authMessage = document.getElementById('auth-message');
 
-/* DOM Elements - Search and Favorites */
+/* DOM Elements - Search, Favorites, and Goals */
 const searchInput = document.getElementById('watch-search');
 const searchBtn = document.getElementById('search-btn');
 const searchDropdown = document.getElementById('search-dropdown');
@@ -25,6 +25,14 @@ const favoritesBtn = document.getElementById('favorites-btn');
 const favoritesCount = document.getElementById('favorites-count');
 const favoritesDropdown = document.getElementById('favorites-dropdown');
 const favoriteToggleBtn = document.getElementById('favorite-toggle-btn');
+const goalsWrap = document.getElementById('goals-wrap');
+const goalsBtn = document.getElementById('goals-btn');
+const goalsCount = document.getElementById('goals-count');
+const pinGoalBtn = document.getElementById('pin-goal-btn');
+const goalsModal = document.getElementById('goals-modal');
+const goalsCloseBtn = document.getElementById('goals-close-btn');
+const goalsStatusMsg = document.getElementById('goals-status-msg');
+const goalsList = document.getElementById('goals-list');
 
 /* DOM Elements - Watch Card */
 const watchBrand = document.getElementById('watch-brand');
@@ -56,8 +64,10 @@ const humorQuote = document.getElementById('humor-quote');
 
 /* State */
 let selectedWatch = null;
+let allWatchesCache = [];
 let currentUser = null;
 let userFavorites = [];
+let userGoals = [];
 let isRegisterMode = false;
 
 /* Request headers helper */
@@ -92,7 +102,7 @@ function loadSavedUser() {
   }
 }
 
-/* Update navbar and favorites UI for current user */
+/* Update navbar, favorites, and goals UI for current user */
 async function syncUserSession() {
   currentUser = loadSavedUser();
 
@@ -101,14 +111,18 @@ async function syncUserSession() {
     navUserBadge.classList.remove('hidden');
     navAuthBtn.textContent = 'Sign Out';
     favoritesWrap.classList.remove('hidden');
-    await fetchUserFavorites();
+    goalsWrap.classList.remove('hidden');
+    await Promise.all([fetchUserFavorites(), fetchUserGoals()]);
   } else {
     userFavorites = [];
+    userGoals = [];
     navUserBadge.textContent = '';
     navUserBadge.classList.add('hidden');
     navAuthBtn.textContent = 'Sign In';
     favoritesWrap.classList.add('hidden');
     favoritesDropdown.classList.add('hidden');
+    goalsWrap.classList.add('hidden');
+    goalsModal.classList.add('hidden');
   }
 
   updateFavoriteToggleState();
@@ -121,7 +135,7 @@ function openAuthModal() {
   authMessage.textContent = '';
   authMessage.className = 'auth-message';
   authModalTitle.textContent = 'Sign In';
-  authModalSubtitle.textContent = 'Sign in to sync your favorite watches.';
+  authModalSubtitle.textContent = 'Sign in to sync your favorite watches and grail goals.';
   authSubmitBtn.textContent = 'SIGN IN';
   authSwitchPrompt.textContent = "Don't have an account?";
   authSwitchBtn.textContent = 'Create Account';
@@ -242,6 +256,199 @@ async function toggleSelectedWatchFavorite() {
   }
 }
 
+/* Fetch user grail goals */
+async function fetchUserGoals() {
+  if (!currentUser || !currentUser.id) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/broke-oclock/users/${currentUser.id}/goals`, {
+      method: 'GET',
+      headers: getApiHeaders()
+    });
+
+    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+    const data = await response.json();
+    userGoals = data.goals || [];
+    goalsCount.textContent = userGoals.length;
+    renderGoalsList();
+  } catch (error) {
+    console.error('Failed to fetch goals:', error);
+  }
+}
+
+/* Pin current calculation as a grail goal */
+async function pinCurrentGoal() {
+  if (!selectedWatch || !selectedWatch.id) return;
+
+  if (!currentUser || !currentUser.id) {
+    openAuthModal();
+    return;
+  }
+
+  const salary = parseFloat(salaryInput.value);
+  const savingsPct = parseInt(savingsSlider.value, 10);
+
+  if (!salary || salary <= 0) {
+    salaryInput.focus();
+    verdictBadge.textContent = 'Enter Salary First';
+    return;
+  }
+
+  pinGoalBtn.disabled = true;
+  pinGoalBtn.textContent = 'Pinning...';
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/broke-oclock/goals`, {
+      method: 'POST',
+      headers: getApiHeaders(),
+      body: JSON.stringify({
+        user_id: currentUser.id,
+        watch_id: selectedWatch.id,
+        monthly_salary: salary,
+        savings_rate: savingsPct,
+        verdict: verdictBadge.textContent
+      })
+    });
+
+    if (!response.ok) throw new Error('Failed to pin goal.');
+    await fetchUserGoals();
+    pinGoalBtn.textContent = 'Pinned ✓';
+    setTimeout(() => {
+      pinGoalBtn.textContent = '+ Pin Goal';
+    }, 1500);
+  } catch (error) {
+    console.error('Pin goal error:', error);
+    pinGoalBtn.textContent = '+ Pin Goal';
+  } finally {
+    pinGoalBtn.disabled = false;
+  }
+}
+
+/* Log one 15/30 payday cutoff deposit toward a goal */
+async function logCutoffDeposit(goalId) {
+  if (!currentUser || !currentUser.id) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/broke-oclock/goals/${goalId}/deposit`, {
+      method: 'PATCH',
+      headers: getApiHeaders(),
+      body: JSON.stringify({ user_id: currentUser.id })
+    });
+
+    if (!response.ok) throw new Error('Failed to log cutoff deposit.');
+    await fetchUserGoals();
+  } catch (error) {
+    console.error('Deposit error:', error);
+  }
+}
+
+/* Delete a saved goal */
+async function deleteGoal(goalId) {
+  if (!currentUser || !currentUser.id) return;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/broke-oclock/goals/${goalId}?user_id=${currentUser.id}`,
+      {
+        method: 'DELETE',
+        headers: getApiHeaders()
+      }
+    );
+
+    if (!response.ok) throw new Error('Failed to remove goal.');
+    await fetchUserGoals();
+  } catch (error) {
+    console.error('Delete goal error:', error);
+  }
+}
+
+/* Compute estimated target month and year */
+function getEstimatedTargetDate(monthsRemaining) {
+  if (monthsRemaining <= 0) return 'Goal Reached';
+  const target = new Date();
+  target.setMonth(target.getMonth() + Math.ceil(monthsRemaining));
+  return target.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+/* Render grail goals inside modal */
+function renderGoalsList() {
+  goalsList.innerHTML = '';
+
+  if (userGoals.length === 0) {
+    goalsStatusMsg.textContent = 'No pinned grail goals yet. Enter your salary on the dashboard and click "+ Pin Goal".';
+    return;
+  }
+
+  goalsStatusMsg.textContent = 'Track your pinned watch budgets and log every 15/30 payday cutoff.';
+
+  userGoals.forEach((goal) => {
+    const price = parseFloat(goal.price_php || 0);
+    const saved = parseFloat(goal.amount_saved || 0);
+    const salary = parseFloat(goal.monthly_salary || 0);
+    const rate = parseInt(goal.savings_rate || 20, 10);
+    const monthlyAlloc = salary * (rate / 100);
+    const cutoffAmt = monthlyAlloc / 2;
+    const remaining = Math.max(0, price - saved);
+    const monthsLeft = monthlyAlloc > 0 ? remaining / monthlyAlloc : 0;
+    const pct = price > 0 ? Math.min(100, (saved / price) * 100) : 0;
+
+    const item = document.createElement('div');
+    item.className = 'goal-item';
+    item.innerHTML = `
+      <div class="goal-item-top">
+        <div>
+          <div class="goal-watch-name">${goal.brand} ${goal.model}</div>
+          <div class="goal-watch-meta">
+            Salary: ${formatCurrency(salary)} (${rate}% cut = ${formatCurrency(cutoffAmt)}/cutoff) • Est. Wrist: ${getEstimatedTargetDate(monthsLeft)}
+          </div>
+        </div>
+        <span class="goal-verdict-pill">${goal.verdict || 'Goal'}</span>
+      </div>
+
+      <div class="goal-progress-wrap">
+        <div class="goal-progress-labels">
+          <span>${formatCurrency(saved)} / ${formatCurrency(price)}</span>
+          <span>${pct.toFixed(1)}%</span>
+        </div>
+        <div class="goal-progress-track">
+          <div class="goal-progress-fill" style="width: ${pct}%"></div>
+        </div>
+      </div>
+
+      <div class="goal-actions">
+        <button type="button" class="goal-btn goal-btn-deposit">+ Log 15/30 Cutoff (${formatCurrency(cutoffAmt)})</button>
+        <button type="button" class="goal-btn goal-btn-load">Load in Calculator</button>
+        <button type="button" class="goal-btn goal-btn-delete">Remove</button>
+      </div>
+    `;
+
+    item.querySelector('.goal-btn-deposit').addEventListener('click', () => {
+      logCutoffDeposit(goal.id);
+    });
+
+    item.querySelector('.goal-btn-load').addEventListener('click', () => {
+      const matchedWatch = allWatchesCache.find((w) => w.id === goal.watch_id) || {
+        id: goal.watch_id,
+        brand: goal.brand,
+        model: goal.model,
+        nickname: goal.nickname,
+        price_php: goal.price_php,
+        image: goal.image
+      };
+      salaryInput.value = salary;
+      savingsSlider.value = rate;
+      displayWatch(matchedWatch);
+      goalsModal.classList.add('hidden');
+    });
+
+    item.querySelector('.goal-btn-delete').addEventListener('click', () => {
+      deleteGoal(goal.id);
+    });
+
+    goalsList.appendChild(item);
+  });
+}
+
 /* Fetch all watches */
 async function fetchAllWatches() {
   try {
@@ -252,7 +459,8 @@ async function fetchAllWatches() {
 
     if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
     const data = await response.json();
-    return data.watches || [];
+    allWatchesCache = data.watches || [];
+    return allWatchesCache;
   } catch (error) {
     console.error('Failed to fetch watches list:', error);
     return [];
@@ -456,13 +664,13 @@ authSwitchBtn.addEventListener('click', () => {
 
   if (isRegisterMode) {
     authModalTitle.textContent = 'Create Account';
-    authModalSubtitle.textContent = 'Create an account to save your favorite watches.';
+    authModalSubtitle.textContent = 'Create an account to save your favorite watches and grail goals.';
     authSubmitBtn.textContent = 'CREATE ACCOUNT';
     authSwitchPrompt.textContent = 'Already have an account?';
     authSwitchBtn.textContent = 'Sign In';
   } else {
     authModalTitle.textContent = 'Sign In';
-    authModalSubtitle.textContent = 'Sign in to sync your favorite watches.';
+    authModalSubtitle.textContent = 'Sign in to sync your favorite watches and grail goals.';
     authSubmitBtn.textContent = 'SIGN IN';
     authSwitchPrompt.textContent = "Don't have an account?";
     authSwitchBtn.textContent = 'Create Account';
@@ -499,7 +707,7 @@ authForm.addEventListener('submit', async (e) => {
       authMessage.className = 'auth-message success';
       isRegisterMode = false;
       authModalTitle.textContent = 'Sign In';
-      authModalSubtitle.textContent = 'Sign in to sync your favorite watches.';
+      authModalSubtitle.textContent = 'Sign in to sync your favorite watches and grail goals.';
       authSubmitBtn.textContent = 'SIGN IN';
       authSwitchPrompt.textContent = "Don't have an account?";
       authSwitchBtn.textContent = 'Create Account';
@@ -518,13 +726,31 @@ authForm.addEventListener('submit', async (e) => {
   }
 });
 
-/* Favorites Event Listeners */
+/* Favorites and Goals Event Listeners */
 favoritesBtn.addEventListener('click', () => {
   favoritesDropdown.classList.toggle('hidden');
   searchDropdown.classList.add('hidden');
 });
 
 favoriteToggleBtn.addEventListener('click', toggleSelectedWatchFavorite);
+
+pinGoalBtn.addEventListener('click', pinCurrentGoal);
+
+goalsBtn.addEventListener('click', () => {
+  favoritesDropdown.classList.add('hidden');
+  searchDropdown.classList.add('hidden');
+  goalsModal.classList.remove('hidden');
+});
+
+goalsCloseBtn.addEventListener('click', () => {
+  goalsModal.classList.add('hidden');
+});
+
+goalsModal.addEventListener('click', (e) => {
+  if (e.target === goalsModal) {
+    goalsModal.classList.add('hidden');
+  }
+});
 
 /* Search and Calculator Event Listeners */
 searchInput.addEventListener('input', async (e) => {

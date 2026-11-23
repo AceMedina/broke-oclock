@@ -193,7 +193,7 @@ body {
   justify-content: center;
 }
 
-/* Search bar and favorites */
+/* Search bar, favorites, and goals */
 .search-row {
   width: 100%;
   flex-shrink: 0;
@@ -249,7 +249,7 @@ body {
   color: var(--c-dark-green);
   border: 1px solid var(--c-border);
   border-radius: 14px;
-  padding: 0 18px;
+  padding: 0 16px;
   font-family: var(--font-num);
   font-size: 12px;
   font-weight: 700;
@@ -260,6 +260,16 @@ body {
 
 .favorites-btn:hover {
   background-color: var(--c-tile-bg);
+}
+
+.goals-nav-btn {
+  background-color: var(--c-dark-green);
+  color: var(--c-light-cream);
+  border-color: var(--c-dark-green);
+}
+
+.goals-nav-btn:hover {
+  background-color: #1F2C1C;
 }
 
 .favorites-dropdown {
@@ -543,6 +553,30 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
+}
+
+.calc-tag-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pin-goal-btn {
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-weight: 700;
+  background-color: var(--c-dark-green);
+  color: var(--c-light-cream);
+  border: none;
+  padding: 3px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.pin-goal-btn:hover {
+  opacity: 0.88;
 }
 
 .tag-brand {
@@ -754,7 +788,7 @@ input[type="range"] {
   width: 100%;
 }
 
-/* Auth Modal */
+/* Modals */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -776,6 +810,13 @@ input[type="range"] {
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
 }
 
+.goals-modal-card {
+  max-width: 580px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .modal-head {
   background-color: var(--c-dark-green);
   color: var(--c-light-cream);
@@ -783,6 +824,7 @@ input[type="range"] {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-shrink: 0;
 }
 
 .modal-tag {
@@ -814,6 +856,10 @@ input[type="range"] {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.goals-modal-body {
+  overflow-y: auto;
 }
 
 .modal-subtitle {
@@ -893,6 +939,119 @@ input[type="range"] {
   font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
+}
+
+/* Grail Goals Cards */
+.goals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.goal-item {
+  background-color: var(--c-tile-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.goal-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.goal-watch-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--c-charcoal);
+}
+
+.goal-watch-meta {
+  font-family: var(--font-num);
+  font-size: 10px;
+  color: var(--c-muted);
+  margin-top: 2px;
+}
+
+.goal-verdict-pill {
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-weight: 700;
+  background-color: var(--c-light-cream);
+  color: var(--c-dark-green);
+  border: 1px solid var(--c-border);
+  padding: 3px 8px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.goal-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.goal-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-num);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--c-charcoal);
+}
+
+.goal-progress-track {
+  width: 100%;
+  height: 8px;
+  background-color: var(--c-input-bg);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.goal-progress-fill {
+  height: 100%;
+  background-color: var(--c-dark-green);
+  border-radius: 99px;
+  transition: width 0.25s ease;
+}
+
+.goal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.goal-btn {
+  font-family: var(--font-num);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--c-dark-green);
+}
+
+.goal-btn-deposit {
+  background-color: var(--c-dark-green);
+  color: var(--c-light-cream);
+}
+
+.goal-btn-load {
+  background-color: var(--c-light-cream);
+  color: var(--c-dark-green);
+}
+
+.goal-btn-delete {
+  background-color: transparent;
+  color: #A62626;
+  border-color: #A62626;
+  margin-left: auto;
 }
 
 /* Mobile & Thin-Screen Responsiveness (≤ 860px) */
