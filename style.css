@@ -560,6 +560,24 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
+}
+
+.affordable-btn {
+  font-family: var(--font-num);
+  font-size: 9px;
+  font-weight: 700;
+  background-color: var(--c-light-cream);
+  color: var(--c-dark-green);
+  border: 1px solid var(--c-dark-green);
+  padding: 2px 7px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.affordable-btn:hover {
+  background-color: var(--c-tile-bg);
 }
 
 .pin-goal-btn {
@@ -941,7 +959,33 @@ input[type="range"] {
   cursor: pointer;
 }
 
-/* Grail Goals Cards */
+/* Horizon Tabs (Affordable Modal) */
+.horizon-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.horizon-tab {
+  font-family: var(--font-num);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--c-border);
+  background-color: var(--c-tile-bg);
+  color: var(--c-charcoal);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.horizon-tab.active {
+  background-color: var(--c-dark-green);
+  color: var(--c-light-cream);
+  border-color: var(--c-dark-green);
+}
+
+/* Grail Goals & Affordable Cards */
 .goals-list {
   display: flex;
   flex-direction: column;
