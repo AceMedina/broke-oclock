@@ -1182,6 +1182,68 @@ input[type="range"] {
   color: var(--c-cream);
 }
 
+/* Inline goal plan editor */
+.goal-edit-btn {
+  background-color: var(--c-cream);
+  color: var(--c-olive);
+  border: 1.5px solid var(--c-olive);
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.goal-edit-btn:hover {
+  background-color: var(--c-tile);
+}
+
+.goal-edit-panel {
+  background-color: var(--c-tile);
+  border: 1.5px solid var(--c-olive);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.goal-edit-inputs {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 8px;
+}
+
+.goal-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.goal-edit-field label {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--c-muted);
+}
+
+.goal-edit-field input {
+  width: 100%;
+  padding: 6px 8px;
+  background-color: var(--c-input);
+  border: 1.5px solid var(--c-olive);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--c-ink);
+  outline: none;
+}
+
+.goal-edit-btns {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
 /* Frame 4: Centered Modal (Top 5 Closest Watches) */
 .brutal-modal {
   width: 100%;

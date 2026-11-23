@@ -35,6 +35,38 @@ function loadSavedUser() {
   }
 }
 
+function getGoalPlanOverride(goalId) {
+  try {
+    const raw = localStorage.getItem(`broke_oclock_goal_plan_${goalId}`);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function saveGoalPlanOverride(goalId, plan) {
+  try {
+    localStorage.setItem(`broke_oclock_goal_plan_${goalId}`, JSON.stringify(plan));
+  } catch (error) {
+    console.error('Failed to save goal plan override:', error);
+  }
+}
+
+function removeGoalPlanOverride(goalId) {
+  try {
+    localStorage.removeItem(`broke_oclock_goal_plan_${goalId}`);
+  } catch (error) {
+    console.error('Failed to clear goal plan override:', error);
+  }
+}
+
+function computeVerdictLabel(monthsNeeded) {
+  if (monthsNeeded <= 6) return 'FINANCIALLY SANE';
+  if (monthsNeeded <= 24) return 'MAJOR COMMITMENT';
+  if (monthsNeeded <= 60) return 'MIDLIFE CRISIS LEVEL';
+  return 'GENERATIONAL DEBT';
+}
+
 /* Login and register page */
 function initLoginPage() {
   const authForm = document.getElementById('auth-form');
@@ -186,13 +218,12 @@ function initDashboardPage() {
   let userGoals = [];
 
   /* Validate salary bounds */
-  function getValidSalary() {
-    const raw = parseFloat(salaryInput.value);
+  function getValidSalary(rawInputValue = salaryInput.value) {
+    const raw = parseFloat(rawInputValue);
     if (!Number.isFinite(raw) || raw < MIN_SALARY_PHP) {
       return null;
     }
     if (raw > MAX_SALARY_PHP) {
-      salaryInput.value = MAX_SALARY_PHP;
       return MAX_SALARY_PHP;
     }
     return raw;
@@ -317,7 +348,7 @@ function initDashboardPage() {
     }
   }
 
- function updateFavoriteButtonState() {
+  function updateFavoriteButtonState() {
     if (!selectedWatch || !selectedWatch.id) {
       favoriteToggleBtn.textContent = '+ Favorite';
       favoriteToggleBtn.classList.remove('is-saved');
@@ -388,7 +419,17 @@ function initDashboardPage() {
       });
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const data = await response.json();
-      userGoals = data.goals || [];
+      userGoals = (data.goals || []).map((goal) => {
+        const override = getGoalPlanOverride(goal.id);
+        return override
+          ? {
+              ...goal,
+              monthly_salary: override.monthly_salary,
+              savings_rate: override.savings_rate,
+              verdict: override.verdict
+            }
+          : goal;
+      });
       goalsCount.textContent = userGoals.length;
       renderGoalsLedger();
       updatePinButtonState();
@@ -404,6 +445,37 @@ function initDashboardPage() {
     return target.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   }
 
+  /* Save updated goal salary and savings cut */
+  async function updateGoalPlan(goal, newSalary, newRate) {
+    const price = parseFloat(goal.price_php || 0);
+    const monthlyAlloc = newSalary * (newRate / 100);
+    const monthsNeeded = monthlyAlloc > 0 ? price / monthlyAlloc : 0;
+    const updatedVerdict = computeVerdictLabel(monthsNeeded);
+
+    saveGoalPlanOverride(goal.id, {
+      monthly_salary: newSalary,
+      savings_rate: newRate,
+      verdict: updatedVerdict
+    });
+
+    try {
+      await fetch(`${API_BASE_URL}/api/v1/broke-oclock/goals/${goal.id}`, {
+        method: 'PATCH',
+        headers: getApiHeaders(),
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          monthly_salary: newSalary,
+          savings_rate: newRate,
+          verdict: updatedVerdict
+        })
+      });
+    } catch (error) {
+      console.error('Goal plan sync fallback used:', error);
+    }
+
+    await fetchUserGoals();
+  }
+
   function renderGoalsLedger() {
     goalsList.innerHTML = '';
 
@@ -412,7 +484,7 @@ function initDashboardPage() {
       return;
     }
 
-    goalsStatusMsg.textContent = 'Log every 15/30 sahod cutoff deposit toward your wrist goal.';
+    goalsStatusMsg.textContent = 'Log every 15/30 sahod cutoff deposit or edit your salary plan anytime.';
 
     userGoals.forEach((goal) => {
       const price = parseFloat(goal.price_php || 0);
@@ -450,6 +522,23 @@ function initDashboardPage() {
           </div>
         </div>
 
+        <div class="goal-edit-panel hidden">
+          <div class="goal-edit-inputs">
+            <div class="goal-edit-field">
+              <label>NEW MONTHLY SALARY (PHP)</label>
+              <input type="number" class="edit-salary-input" value="${salary}" min="1000" max="100000000" />
+            </div>
+            <div class="goal-edit-field">
+              <label>SAVINGS CUT (5%–100%)</label>
+              <input type="number" class="edit-rate-input" value="${rate}" min="5" max="100" step="5" />
+            </div>
+          </div>
+          <div class="goal-edit-btns">
+            <button type="button" class="mini-brutal-btn cancel-edit-btn">Cancel</button>
+            <button type="button" class="action-solid-btn save-edit-btn" style="padding: 5px 12px; font-size: 11px;">Save Plan</button>
+          </div>
+        </div>
+
         <div class="goal-progress-block">
           <div class="goal-progress-text">
             <span>${formatCurrency(clampedSaved)} / ${formatCurrency(price)}</span>
@@ -464,15 +553,44 @@ function initDashboardPage() {
           <button type="button" class="goal-deposit-btn" ${isCompleted ? 'disabled' : ''}>
             ${isCompleted ? 'Goal Reached ✓' : `+ Log 15/30 Cutoff (${formatCurrency(cutoffAmt)})`}
           </button>
-          <button type="button" class="goal-load-btn">Load in Calculator</button>
+          <button type="button" class="goal-edit-btn">Edit</button>
+          <button type="button" class="goal-load-btn">Load</button>
           <button type="button" class="goal-remove-btn">Remove</button>
         </div>
       `;
 
+      const editPanel = card.querySelector('.goal-edit-panel');
+      const editSalaryInput = card.querySelector('.edit-salary-input');
+      const editRateInput = card.querySelector('.edit-rate-input');
+
+      card.querySelector('.goal-edit-btn').addEventListener('click', () => {
+        editPanel.classList.toggle('hidden');
+        if (!editPanel.classList.contains('hidden')) {
+          editSalaryInput.focus();
+        }
+      });
+
+      card.querySelector('.cancel-edit-btn').addEventListener('click', () => {
+        editSalaryInput.value = salary;
+        editRateInput.value = rate;
+        editPanel.classList.add('hidden');
+      });
+
+      card.querySelector('.save-edit-btn').addEventListener('click', async () => {
+        const validNewSalary = getValidSalary(editSalaryInput.value);
+        if (!validNewSalary) {
+          editSalaryInput.focus();
+          return;
+        }
+        const rawRate = parseInt(editRateInput.value, 10);
+        const validNewRate = Number.isFinite(rawRate) ? Math.min(100, Math.max(5, rawRate)) : rate;
+        await updateGoalPlan(goal, validNewSalary, validNewRate);
+      });
+
       const depositBtn = card.querySelector('.goal-deposit-btn');
       if (!isCompleted) {
         depositBtn.addEventListener('click', () => {
-          logCutoffDeposit(goal);
+          logCutoffDeposit(goal, cutoffAmt);
         });
       }
 
@@ -522,6 +640,10 @@ function initDashboardPage() {
       return;
     }
 
+    if (parseFloat(salaryInput.value) > MAX_SALARY_PHP) {
+      salaryInput.value = MAX_SALARY_PHP;
+    }
+
     pinGoalBtn.disabled = true;
     pinGoalBtn.textContent = 'Pinning...';
 
@@ -549,7 +671,7 @@ function initDashboardPage() {
     }
   }
 
-  async function logCutoffDeposit(goal) {
+  async function logCutoffDeposit(goal, cutoffAmt) {
     if (!currentUser || !currentUser.id) return;
 
     const price = parseFloat(goal.price_php || 0);
@@ -560,7 +682,10 @@ function initDashboardPage() {
       const response = await fetch(`${API_BASE_URL}/api/v1/broke-oclock/goals/${goal.id}/deposit`, {
         method: 'PATCH',
         headers: getApiHeaders(),
-        body: JSON.stringify({ user_id: currentUser.id })
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          deposit_amount: cutoffAmt
+        })
       });
 
       if (!response.ok) throw new Error('Failed to log deposit.');
@@ -583,6 +708,7 @@ function initDashboardPage() {
       );
 
       if (!response.ok) throw new Error('Failed to remove goal.');
+      removeGoalPlanOverride(goalId);
       await fetchUserGoals();
     } catch (error) {
       console.error('Delete goal error:', error);
@@ -596,6 +722,10 @@ function initDashboardPage() {
       salaryInput.focus();
       verdictBadge.textContent = 'MIN SALARY ₱1,000';
       return;
+    }
+
+    if (parseFloat(salaryInput.value) > MAX_SALARY_PHP) {
+      salaryInput.value = MAX_SALARY_PHP;
     }
 
     affordableBackdrop.classList.remove('hidden');
@@ -787,6 +917,10 @@ function initDashboardPage() {
     const savingsPct = parseInt(savingsSlider.value, 10);
     savingsDisplay.textContent = `${savingsPct}%`;
 
+    if (parseFloat(salaryInput.value) > MAX_SALARY_PHP) {
+      salaryInput.value = MAX_SALARY_PHP;
+    }
+
     if (!selectedWatch || !salary) {
       outYears.textContent = '--';
       outCutoffs.textContent = '--';
@@ -814,18 +948,11 @@ function initDashboardPage() {
     outCutoffs.textContent = cutoffsNeeded.toLocaleString();
     outHours.textContent = hoursNeeded.toLocaleString();
 
-    if (monthsNeeded <= 6) {
-      verdictBadge.textContent = 'FINANCIALLY SANE';
-      verdictBadge.classList.remove('verdict-alert');
-    } else if (monthsNeeded <= 24) {
-      verdictBadge.textContent = 'MAJOR COMMITMENT';
-      verdictBadge.classList.remove('verdict-alert');
-    } else if (monthsNeeded <= 60) {
-      verdictBadge.textContent = 'MIDLIFE CRISIS LEVEL';
+    verdictBadge.textContent = computeVerdictLabel(monthsNeeded);
+    if (monthsNeeded > 24) {
       verdictBadge.classList.add('verdict-alert');
     } else {
-      verdictBadge.textContent = 'GENERATIONAL DEBT';
-      verdictBadge.classList.add('verdict-alert');
+      verdictBadge.classList.remove('verdict-alert');
     }
 
     eqChicken.textContent = Math.floor(price / 180).toLocaleString();
