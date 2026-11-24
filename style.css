@@ -16,7 +16,7 @@
   --font-mono: 'Space Mono', monospace;
 }
 
-/* Base Reset */
+/* Base reset */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -38,9 +38,7 @@ body {
   min-height: 100vh;
 }
 
-/* =========================================================
-   FRAME 1: SPLIT-SCREEN LOGIN PAGE (login.html)
-   ========================================================= */
+/* Split-screen login page */
 .login-body {
   background-color: var(--c-parchment);
   min-height: 100vh;
@@ -244,9 +242,71 @@ body {
   cursor: not-allowed;
 }
 
-/* =========================================================
-   FRAME 2: STICKY TOP NAVBAR & COMPACT HERO BAND
-   ========================================================= */
+/* Ecosystem switcher */
+.ecosystem-box {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1.5px solid var(--c-border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ecosystem-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  color: var(--c-muted);
+  text-align: center;
+}
+
+.ecosystem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ecosystem-link {
+  background-color: var(--c-tile);
+  border: 2px solid var(--c-olive);
+  padding: 9px 10px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.ecosystem-link:hover {
+  background-color: var(--c-olive);
+}
+
+.ecosystem-name {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--c-ink);
+  transition: color 0.15s;
+}
+
+.ecosystem-desc {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--c-olive);
+  transition: color 0.15s;
+}
+
+.ecosystem-link:hover .ecosystem-name {
+  color: var(--c-cream);
+}
+
+.ecosystem-link:hover .ecosystem-desc {
+  color: var(--c-tan);
+}
+
+/* Sticky top navigation */
 .top-nav {
   position: sticky;
   top: 0;
@@ -327,7 +387,7 @@ body {
   background-color: var(--c-olive-deep);
 }
 
-/* Compact Editorial Hero Band */
+/* Hero banner */
 .hero-banner {
   background-color: var(--c-olive);
   color: var(--c-cream);
@@ -387,9 +447,7 @@ body {
   color: var(--c-tan);
 }
 
-/* =========================================================
-   MAIN WORKSPACE & BRUTALIST CARDS
-   ========================================================= */
+/* Main workspace and cards */
 .workspace {
   padding: 22px 24px 36px 24px;
 }
@@ -426,7 +484,7 @@ body {
   color: var(--c-muted);
 }
 
-/* Full-Width Search Bar */
+/* Search bar */
 .search-box-wrap {
   position: relative;
   background-color: var(--c-cream);
@@ -512,7 +570,7 @@ body {
   font-weight: 700;
 }
 
-/* Two-Column Main Grid */
+/* Main two-column grid */
 .main-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -520,7 +578,7 @@ body {
   align-items: stretch;
 }
 
-/* Left Card: Watch Panel */
+/* Watch display panel */
 .watch-panel {
   padding: 20px;
   display: flex;
@@ -608,7 +666,7 @@ body {
   min-height: 16px;
 }
 
-/* 6-Cell Bordered Specs Table */
+/* Watch specs table */
 .specs-table {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -643,7 +701,7 @@ body {
   text-overflow: ellipsis;
 }
 
-/* Right Card: Financial Reality Audit */
+/* Financial audit panel */
 .audit-panel {
   padding: 20px;
   display: flex;
@@ -774,7 +832,7 @@ input[type="range"] {
   background-color: var(--c-olive-deep);
 }
 
-/* 3-Column Dark Readout Banner */
+/* Audit readout banner */
 .audit-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -811,9 +869,7 @@ input[type="range"] {
   line-height: 1;
 }
 
-/* =========================================================
-   FULL-WIDTH BOTTOM CARD: TRADE-OFFS
-   ========================================================= */
+/* Trade-offs comparison card */
 .tradeoffs-panel {
   overflow: hidden;
 }
@@ -863,9 +919,7 @@ input[type="range"] {
   font-size: 11.5px;
 }
 
-/* =========================================================
-   FRAME 3 & FRAME 4: SLIDE-OVER DRAWER & CENTERED MODAL
-   ========================================================= */
+/* Drawer and modal overlays */
 .overlay-backdrop {
   position: fixed;
   inset: 0;
@@ -902,7 +956,7 @@ input[type="range"] {
   color: var(--c-cream);
 }
 
-/* Right Slide-Over Drawer (Favorites + Grail Goals) */
+/* Favorites and goals drawer */
 .ledger-drawer {
   width: 100%;
   max-width: 560px;
@@ -1182,7 +1236,7 @@ input[type="range"] {
   color: var(--c-cream);
 }
 
-/* Inline goal plan editor */
+/* Goal plan editor */
 .goal-edit-btn {
   background-color: var(--c-cream);
   color: var(--c-olive);
@@ -1244,7 +1298,7 @@ input[type="range"] {
   justify-content: flex-end;
 }
 
-/* Frame 4: Centered Modal (Top 5 Closest Watches) */
+/* Closest watches modal */
 .brutal-modal {
   width: 100%;
   max-width: 720px;
@@ -1375,7 +1429,7 @@ input[type="range"] {
   background-color: var(--c-tile);
 }
 
-/* Responsive Safeguard for Narrow Windows */
+/* Responsive layout */
 @media (max-width: 900px) {
   .login-split,
   .main-grid {
